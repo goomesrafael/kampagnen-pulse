@@ -7,7 +7,8 @@ import {
   Lightbulb, 
   Settings,
   LogOut,
-  Menu
+  Menu,
+  RefreshCw
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -17,7 +18,7 @@ import { SessionsChart } from '@/components/SessionsChart';
 import { CampaignChart } from '@/components/CampaignChart';
 import { AlertBanner } from '@/components/AlertBanner';
 import { Button } from '@/components/ui/button';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Sheet,
@@ -25,6 +26,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { MousePointerClick, Eye, Target, TrendingUp, ArrowDownRight } from 'lucide-react';
+import { useGoogleSheetsData } from '@/hooks/useGoogleSheetsData';
 
 const navItems = [
   { key: 'overview', icon: LayoutDashboard, path: '/dashboard' },
@@ -34,21 +36,39 @@ const navItems = [
   { key: 'settings', icon: Settings, path: '/dashboard/settings' },
 ];
 
-export default function Dashboard() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+function formatNumber(num: number): string {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return num.toLocaleString();
+}
 
-  useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => setLoading(false), 1200);
-    return () => clearTimeout(timer);
-  }, []);
+function formatLastUpdate(date: Date | null, locale: string): string {
+  if (!date) return '';
+  
+  return date.toLocaleDateString(locale === 'de' ? 'de-DE' : 'pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+export default function Dashboard() {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { data, loading, error, refresh } = useGoogleSheetsData();
 
   const handleLogout = () => {
     navigate('/');
   };
+
+  const metrics = data?.metrics;
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
@@ -116,9 +136,20 @@ export default function Dashboard() {
             </Sheet>
             <div>
               <h1 className="text-xl font-semibold tracking-tight">{t('dashboard.title')}</h1>
-              <p className="text-sm text-muted-foreground">
-                {t('dashboard.lastUpdate')}: {new Date().toLocaleDateString()}
-              </p>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>
+                  {t('dashboard.lastUpdate')}: {data?.lastUpdated ? formatLastUpdate(data.lastUpdated, i18n.language) : '—'}
+                </span>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6" 
+                  onClick={refresh}
+                  disabled={loading}
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+                </Button>
+              </div>
             </div>
           </div>
           
@@ -130,6 +161,13 @@ export default function Dashboard() {
 
         {/* Dashboard Content */}
         <main className="flex-1 p-6 space-y-6 overflow-auto">
+          {/* Error Banner */}
+          {error && (
+            <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
           {/* Alert Banner */}
           <AlertBanner />
 
@@ -137,7 +175,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             <MetricCard
               title={t('dashboard.metrics.clicks')}
-              value="12,847"
+              value={metrics ? formatNumber(metrics.clicks) : '—'}
               description={t('dashboard.metrics.clicksDesc')}
               change={12.5}
               icon={<MousePointerClick className="h-5 w-5" />}
@@ -145,7 +183,7 @@ export default function Dashboard() {
             />
             <MetricCard
               title={t('dashboard.metrics.impressions')}
-              value="284,520"
+              value={metrics ? formatNumber(metrics.impressions) : '—'}
               description={t('dashboard.metrics.impressionsDesc')}
               change={8.3}
               icon={<Eye className="h-5 w-5" />}
@@ -153,7 +191,7 @@ export default function Dashboard() {
             />
             <MetricCard
               title={t('dashboard.metrics.conversions')}
-              value="856"
+              value={metrics ? formatNumber(metrics.conversions) : '—'}
               description={t('dashboard.metrics.conversionsDesc')}
               change={-3.2}
               icon={<Target className="h-5 w-5" />}
@@ -161,7 +199,7 @@ export default function Dashboard() {
             />
             <MetricCard
               title={t('dashboard.metrics.roas')}
-              value="3.8x"
+              value={metrics ? `${metrics.roas.toFixed(1)}x` : '—'}
               description={t('dashboard.metrics.roasDesc')}
               change={5.1}
               icon={<TrendingUp className="h-5 w-5" />}
@@ -169,7 +207,7 @@ export default function Dashboard() {
             />
             <MetricCard
               title={t('dashboard.metrics.bounceRate')}
-              value="42.3%"
+              value={metrics ? `${metrics.bounceRate.toFixed(1)}%` : '—'}
               description={t('dashboard.metrics.bounceRateDesc')}
               change={-2.1}
               icon={<ArrowDownRight className="h-5 w-5" />}
@@ -179,8 +217,8 @@ export default function Dashboard() {
 
           {/* Charts Grid */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <SessionsChart loading={loading} />
-            <CampaignChart loading={loading} />
+            <SessionsChart loading={loading} data={data?.dailyData} />
+            <CampaignChart loading={loading} data={data?.campaigns} />
           </div>
 
           {/* AI Suggestions Section */}

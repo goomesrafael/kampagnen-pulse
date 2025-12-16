@@ -2,23 +2,26 @@ import { useTranslation } from 'react-i18next';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CampaignData } from '@/hooks/useGoogleSheetsData';
 
 interface CampaignChartProps {
   className?: string;
   loading?: boolean;
+  data?: CampaignData[];
 }
 
-// Sample campaign data
-const campaignData = [
-  { name: 'Brand Search', clicks: 4520, conversions: 312, roas: 4.2 },
-  { name: 'Shopping', clicks: 3890, conversions: 245, roas: 3.8 },
-  { name: 'Display', clicks: 2100, conversions: 89, roas: 2.1 },
-  { name: 'Remarketing', clicks: 1850, conversions: 167, roas: 5.2 },
-  { name: 'Video', clicks: 980, conversions: 42, roas: 1.8 },
+// Fallback sample campaign data
+const sampleCampaignData: CampaignData[] = [
+  { name: 'Brand Search', clicks: 4520, impressions: 45200, conversions: 312, spend: 1200 },
+  { name: 'Shopping', clicks: 3890, impressions: 38900, conversions: 245, spend: 980 },
+  { name: 'Display', clicks: 2100, impressions: 42000, conversions: 89, spend: 650 },
+  { name: 'Remarketing', clicks: 1850, impressions: 18500, conversions: 167, spend: 420 },
+  { name: 'Video', clicks: 980, impressions: 19600, conversions: 42, spend: 380 },
 ];
 
-export function CampaignChart({ className, loading = false }: CampaignChartProps) {
+export function CampaignChart({ className, loading = false, data }: CampaignChartProps) {
   const { t } = useTranslation();
+  const chartData = data && data.length > 0 ? data : sampleCampaignData;
 
   if (loading) {
     return (
@@ -44,7 +47,7 @@ export function CampaignChart({ className, loading = false }: CampaignChartProps
       
       <div className="h-[300px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={campaignData} layout="vertical" margin={{ top: 10, right: 20, left: 80, bottom: 0 }}>
+          <BarChart data={chartData} layout="vertical" margin={{ top: 10, right: 20, left: 80, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={true} vertical={false} />
             <XAxis 
               type="number"
@@ -63,19 +66,21 @@ export function CampaignChart({ className, loading = false }: CampaignChartProps
             <Tooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
-                  const data = payload[0].payload;
+                  const item = payload[0].payload as CampaignData;
                   return (
                     <div className="chart-tooltip">
-                      <p className="font-medium text-foreground mb-1">{data.name}</p>
+                      <p className="font-medium text-foreground mb-1">{item.name}</p>
                       <p className="text-primary">
-                        {t('dashboard.metrics.clicks')}: {data.clicks.toLocaleString()}
+                        {t('dashboard.metrics.clicks')}: {item.clicks.toLocaleString()}
                       </p>
                       <p className="text-success">
-                        {t('dashboard.metrics.conversions')}: {data.conversions}
+                        {t('dashboard.metrics.conversions')}: {item.conversions}
                       </p>
-                      <p className="text-accent-foreground">
-                        ROAS: {data.roas}x
-                      </p>
+                      {item.spend > 0 && (
+                        <p className="text-muted-foreground">
+                          Spend: €{item.spend.toLocaleString()}
+                        </p>
+                      )}
                     </div>
                   );
                 }
