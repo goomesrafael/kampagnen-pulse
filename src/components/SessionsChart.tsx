@@ -2,15 +2,17 @@ import { useTranslation } from 'react-i18next';
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DailyData } from '@/hooks/useGoogleSheetsData';
 
 interface SessionsChartProps {
   className?: string;
   loading?: boolean;
+  data?: DailyData[];
 }
 
-// Sample data - in production this would come from GA4 API
-const generateSampleData = () => {
-  const data = [];
+// Fallback sample data
+const generateSampleData = (): DailyData[] => {
+  const data: DailyData[] = [];
   const today = new Date();
   for (let i = 29; i >= 0; i--) {
     const date = new Date(today);
@@ -18,16 +20,17 @@ const generateSampleData = () => {
     data.push({
       date: date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }),
       sessions: Math.floor(Math.random() * 500) + 800,
-      pageviews: Math.floor(Math.random() * 1200) + 1500,
+      clicks: Math.floor(Math.random() * 300) + 400,
+      impressions: Math.floor(Math.random() * 1200) + 1500,
+      conversions: Math.floor(Math.random() * 50) + 20,
     });
   }
   return data;
 };
 
-const data = generateSampleData();
-
-export function SessionsChart({ className, loading = false }: SessionsChartProps) {
+export function SessionsChart({ className, loading = false, data }: SessionsChartProps) {
   const { t } = useTranslation();
+  const chartData = data && data.length > 0 ? data : generateSampleData();
 
   if (loading) {
     return (
@@ -53,7 +56,7 @@ export function SessionsChart({ className, loading = false }: SessionsChartProps
       
       <div className="h-[300px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="sessionsGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
