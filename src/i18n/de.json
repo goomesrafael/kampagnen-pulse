@@ -1,0 +1,66 @@
+{
+  "common": {
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "dashboard": "Dashboard",
+    "settings": "Einstellungen",
+    "exportPdf": "Als PDF exportieren",
+    "loading": "Wird geladen...",
+    "language": "Sprache"
+  },
+  "login": {
+    "title": "KampagnenRadar",
+    "subtitle": "Melden Sie sich an, um Ihre Kampagnen zu verstehen.",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "signIn": "Anmelden",
+    "forgotPassword": "Passwort vergessen?",
+    "noAccount": "Noch kein Konto?",
+    "createAccount": "Konto erstellen"
+  },
+  "dashboard": {
+    "title": "Dashboard-Übersicht",
+    "welcome": "Willkommen zurück",
+    "lastUpdate": "Letzte Aktualisierung",
+    "metrics": {
+      "clicks": "Klicks",
+      "clicksDesc": "Gesamtzahl der Klicks auf Ihre Anzeigen",
+      "impressions": "Impressionen",
+      "impressionsDesc": "Wie oft Ihre Anzeigen angezeigt wurden",
+      "conversions": "Conversions",
+      "conversionsDesc": "Anzahl der abgeschlossenen Zielaktionen",
+      "roas": "ROAS",
+      "roasDesc": "Return on Ad Spend - Rendite Ihrer Werbeausgaben",
+      "bounceRate": "Absprungrate",
+      "bounceRateDesc": "Prozentsatz der Besucher, die sofort abspringen",
+      "sessions": "Sitzungen",
+      "sessionsDesc": "Anzahl der Website-Besuche"
+    },
+    "charts": {
+      "sessionsTitle": "Sitzungen im Zeitverlauf",
+      "sessionsDesc": "Zeigt die Entwicklung der Sitzungen im letzten Monat.",
+      "campaignPerformance": "Kampagnenleistung",
+      "campaignDesc": "Vergleich der Leistung Ihrer aktiven Kampagnen."
+    }
+  },
+  "alerts": {
+    "trafficDrop": "Achtung: Ihr Website-Traffic ist um {{percent}}% gefallen.",
+    "lowCtr": "Klickrate unter Durchschnitt. Mögliche Ursache: schlecht formulierte Anzeige.",
+    "highBounce": "Hohe Absprungrate erkannt. Überprüfen Sie Ihre Landing Page."
+  },
+  "suggestions": {
+    "title": "Optimierungsvorschläge",
+    "longtail": "Fügen Sie Longtail-Keywords hinzu, um Nischenzielgruppen zu erreichen.",
+    "budget": "Reduzieren Sie das Budget für Anzeige X um 15%.",
+    "lastOptimization": "Letzte Optimierung am {{date}}.",
+    "improving": "Ihre Anzeigenleistung verbessert sich."
+  },
+  "nav": {
+    "overview": "Übersicht",
+    "campaigns": "Kampagnen",
+    "analytics": "Analysen",
+    "alerts": "Warnungen",
+    "suggestions": "Vorschläge",
+    "settings": "Einstellungen"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "common": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "dashboard": "Painel",
+    "settings": "Configurações",
+    "exportPdf": "Exportar como PDF",
+    "loading": "Carregando...",
+    "language": "Idioma"
+  },
+  "login": {
+    "title": "KampagnenRadar",
+    "subtitle": "Acesse para entender suas campanhas.",
+    "email": "Endereço de e-mail",
+    "password": "Senha",
+    "signIn": "Entrar",
+    "forgotPassword": "Esqueceu a senha?",
+    "noAccount": "Não tem uma conta?",
+    "createAccount": "Criar conta"
+  },
+  "dashboard": {
+    "title": "Visão Geral do Painel",
+    "welcome": "Bem-vindo de volta",
+    "lastUpdate": "Última atualização",
+    "metrics": {
+      "clicks": "Cliques",
+      "clicksDesc": "Total de cliques nos seus anúncios",
+      "impressions": "Impressões",
+      "impressionsDesc": "Quantas vezes seus anúncios foram exibidos",
+      "conversions": "Conversões",
+      "conversionsDesc": "Número de ações de meta concluídas",
+      "roas": "ROAS",
+      "roasDesc": "Retorno sobre gastos com anúncios",
+      "bounceRate": "Taxa de Rejeição",
+      "bounceRateDesc": "Porcentagem de visitantes que saem imediatamente",
+      "sessions": "Sessões",
+      "sessionsDesc": "Número de visitas ao site"
+    },
+    "charts": {
+      "sessionsTitle": "Sessões ao Longo do Tempo",
+      "sessionsDesc": "Mostra a evolução das sessões no último mês.",
+      "campaignPerformance": "Desempenho da Campanha",
+      "campaignDesc": "Comparação do desempenho das suas campanhas ativas."
+    }
+  },
+  "alerts": {
+    "trafficDrop": "Atenção: o tráfego do seu site caiu {{percent}}%.",
+    "lowCtr": "CTR abaixo da média. Possível causa: anúncio mal formulado.",
+    "highBounce": "Alta taxa de rejeição detectada. Verifique sua landing page."
+  },
+  "suggestions": {
+    "title": "Sugestões de Otimização",
+    "longtail": "Adicione palavras-chave long tail para atingir nichos específicos.",
+    "budget": "Reduza o orçamento do anúncio X em 15%.",
+    "lastOptimization": "Última otimização: {{date}}.",
+    "improving": "O desempenho dos seus anúncios está melhorando."
+  },
+  "nav": {
+    "overview": "Visão Geral",
+    "campaigns": "Campanhas",
+    "analytics": "Análises",
+    "alerts": "Alertas",
+    "suggestions": "Sugestões",
+    "settings": "Configurações"
+  }
+}
