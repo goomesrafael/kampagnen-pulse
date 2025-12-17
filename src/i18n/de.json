@@ -1,26 +1,32 @@
 {
-  "common": {
-    "login": "Anmelden",
-    "logout": "Abmelden",
-    "dashboard": "Dashboard",
-    "settings": "Einstellungen",
-    "exportPdf": "Als PDF exportieren",
-    "loading": "Wird geladen...",
-    "language": "Sprache"
-  },
   "login": {
-    "title": "KampagnenRadar",
+    "title": "Anmelden",
     "subtitle": "Melden Sie sich an, um Ihre Kampagnen zu verstehen.",
-    "email": "E-Mail-Adresse",
+    "email": "E-Mail",
     "password": "Passwort",
     "signIn": "Anmelden",
-    "forgotPassword": "Passwort vergessen?",
+    "signUp": "Registrieren",
     "noAccount": "Noch kein Konto?",
-    "createAccount": "Konto erstellen"
+    "hasAccount": "Bereits ein Konto?",
+    "forgotPassword": "Passwort vergessen?",
+    "createAccount": "Konto erstellen",
+    "welcome": "Willkommen bei KampagnenRadar",
+    "description": "Ihre zentrale Plattform für intelligente Kampagnenoptimierung und Datenanalyse.",
+    "features": {
+      "analytics": "Echtzeitanalyse Ihrer Kampagnenleistung",
+      "alerts": "Automatische Warnungen bei Traffic-Einbrüchen",
+      "suggestions": "KI-gestützte Optimierungsvorschläge"
+    }
+  },
+  "nav": {
+    "overview": "Übersicht",
+    "campaigns": "Kampagnen",
+    "alerts": "Warnungen",
+    "suggestions": "Vorschläge",
+    "settings": "Einstellungen"
   },
   "dashboard": {
     "title": "Dashboard-Übersicht",
-    "welcome": "Willkommen zurück",
     "lastUpdate": "Letzte Aktualisierung",
     "metrics": {
       "clicks": "Klicks",
@@ -30,37 +36,59 @@
       "conversions": "Conversions",
       "conversionsDesc": "Anzahl der abgeschlossenen Zielaktionen",
       "roas": "ROAS",
-      "roasDesc": "Return on Ad Spend - Rendite Ihrer Werbeausgaben",
+      "roasDesc": "Return on Advertising Spend",
       "bounceRate": "Absprungrate",
-      "bounceRateDesc": "Prozentsatz der Besucher, die sofort abspringen",
-      "sessions": "Sitzungen",
-      "sessionsDesc": "Anzahl der Website-Besuche"
-    },
-    "charts": {
-      "sessionsTitle": "Sitzungen im Zeitverlauf",
-      "sessionsDesc": "Zeigt die Entwicklung der Sitzungen im letzten Monat.",
-      "campaignPerformance": "Kampagnenleistung",
-      "campaignDesc": "Vergleich der Leistung Ihrer aktiven Kampagnen."
+      "bounceRateDesc": "Prozentsatz der Einzelseitenbesuche",
+      "cost": "Kosten",
+      "costDesc": "Gesamtausgaben für Werbung"
     }
   },
+  "charts": {
+    "sessions": "Sitzungsverlauf",
+    "sessionsDesc": "Zeigt die Entwicklung der Sitzungen im letzten Monat.",
+    "campaigns": "Kampagnenleistung",
+    "campaignsDesc": "Vergleich der Klicks und Conversions nach Kampagne."
+  },
   "alerts": {
-    "trafficDrop": "Achtung: Ihr Website-Traffic ist um {{percent}}% gefallen.",
-    "lowCtr": "Klickrate unter Durchschnitt. Mögliche Ursache: schlecht formulierte Anzeige.",
-    "highBounce": "Hohe Absprungrate erkannt. Überprüfen Sie Ihre Landing Page."
+    "title": "Wichtige Warnung",
+    "dismiss": "Schließen",
+    "trafficDrop": "Achtung: Ihr Website-Traffic ist um {percent}% gefallen.",
+    "lowCtr": "Klickrate unter Durchschnitt. Mögliche Ursache: schlecht formulierte Anzeige."
   },
   "suggestions": {
     "title": "Optimierungsvorschläge",
+    "lastOptimization": "Letzte Optimierung am {date}",
     "longtail": "Fügen Sie Longtail-Keywords hinzu, um Nischenzielgruppen zu erreichen.",
     "budget": "Reduzieren Sie das Budget für Anzeige X um 15%.",
-    "lastOptimization": "Letzte Optimierung am {{date}}.",
     "improving": "Ihre Anzeigenleistung verbessert sich."
   },
-  "nav": {
-    "overview": "Übersicht",
-    "campaigns": "Kampagnen",
-    "analytics": "Analysen",
-    "alerts": "Warnungen",
-    "suggestions": "Vorschläge",
-    "settings": "Einstellungen"
+  "suggestions": {
+    "title": "Optimierungsvorschläge",
+    "lastOptimization": "Letzte Optimierung am {date}",
+    "longtail": "Fügen Sie Longtail-Keywords hinzu, um Nischenzielgruppen zu erreichen.",
+    "budget": "Reduzieren Sie das Budget für Anzeige X um 15%."
+  },
+  "table": {
+    "title": "Kampagnenleistung (Vergleich mit Vorperiode)",
+    "campaign": "Kampagne",
+    "budget": "Budget",
+    "clicks": "Klicks",
+    "impressions": "Impressionen",
+    "ctr": "CTR",
+    "avgCpc": "Avg. CPC",
+    "cost": "Kosten",
+    "conversions": "Conversions",
+    "costPerConv": "Kosten/Conv.",
+    "convRate": "Conv.-Rate"
+  },
+  "export": {
+    "pdf": "Als PDF exportieren",
+    "generating": "Wird generiert..."
+  },
+  "common": {
+    "logout": "Abmelden",
+    "loading": "Laden...",
+    "error": "Fehler",
+    "noData": "Keine Daten verfügbar"
   }
 }

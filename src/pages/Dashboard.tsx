@@ -8,7 +8,13 @@ import {
   Settings,
   LogOut,
   Menu,
-  RefreshCw
+  RefreshCw,
+  MousePointerClick, 
+  Eye, 
+  Target, 
+  TrendingUp, 
+  ArrowDownRight,
+  Euro
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -16,6 +22,7 @@ import { ExportPdfButton } from '@/components/ExportPdfButton';
 import { MetricCard } from '@/components/MetricCard';
 import { SessionsChart } from '@/components/SessionsChart';
 import { CampaignChart } from '@/components/CampaignChart';
+import { CampaignPerformanceTable } from '@/components/CampaignPerformanceTable';
 import { AlertBanner } from '@/components/AlertBanner';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -25,7 +32,6 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { MousePointerClick, Eye, Target, TrendingUp, ArrowDownRight } from 'lucide-react';
 import { useGoogleSheetsData } from '@/hooks/useGoogleSheetsData';
 
 const navItems = [
@@ -172,7 +178,7 @@ export default function Dashboard() {
           <AlertBanner />
 
           {/* Metrics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             <MetricCard
               title={t('dashboard.metrics.clicks')}
               value={metrics ? formatNumber(metrics.clicks) : '—'}
@@ -198,6 +204,14 @@ export default function Dashboard() {
               loading={loading}
             />
             <MetricCard
+              title={t('dashboard.metrics.cost')}
+              value={metrics ? `${metrics.spend.toFixed(2)} €` : '—'}
+              description={t('dashboard.metrics.costDesc')}
+              change={-5.2}
+              icon={<Euro className="h-5 w-5" />}
+              loading={loading}
+            />
+            <MetricCard
               title={t('dashboard.metrics.roas')}
               value={metrics ? `${metrics.roas.toFixed(1)}x` : '—'}
               description={t('dashboard.metrics.roasDesc')}
@@ -214,6 +228,9 @@ export default function Dashboard() {
               loading={loading}
             />
           </div>
+
+          {/* Campaign Performance Table */}
+          <CampaignPerformanceTable campaigns={data?.campaigns} loading={loading} />
 
           {/* Charts Grid */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
