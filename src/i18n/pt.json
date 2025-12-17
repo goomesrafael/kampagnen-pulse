@@ -62,12 +62,6 @@
     "budget": "Reduza o orçamento do anúncio X em 15%.",
     "improving": "O desempenho dos seus anúncios está melhorando."
   },
-  "suggestions": {
-    "title": "Sugestões de Otimização",
-    "lastOptimization": "Última otimização: {date}",
-    "longtail": "Adicione palavras-chave long tail para atingir nichos específicos.",
-    "budget": "Reduza o orçamento do anúncio X em 15%."
-  },
   "table": {
     "title": "Desempenho das Campanhas (Comparação com Período Anterior)",
     "campaign": "Campanha",
@@ -84,6 +78,11 @@
   "export": {
     "pdf": "Exportar como PDF",
     "generating": "Gerando..."
+  },
+  "dateFilter": {
+    "selectRange": "Selecionar período",
+    "from": "De",
+    "to": "Até"
   },
   "common": {
     "logout": "Sair",

@@ -24,9 +24,11 @@ import { SessionsChart } from '@/components/SessionsChart';
 import { CampaignChart } from '@/components/CampaignChart';
 import { CampaignPerformanceTable } from '@/components/CampaignPerformanceTable';
 import { AlertBanner } from '@/components/AlertBanner';
+import { DateRangePicker } from '@/components/DateRangePicker';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { DateRange } from 'react-day-picker';
 import { 
   Sheet,
   SheetContent,
@@ -68,7 +70,8 @@ export default function Dashboard() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { data, loading, error, refresh } = useGoogleSheetsData();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const { data, loading, error, refresh } = useGoogleSheetsData(dateRange);
 
   const handleLogout = () => {
     navigate('/');
@@ -160,6 +163,7 @@ export default function Dashboard() {
           </div>
           
           <div className="flex items-center gap-3">
+            <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} />
             <ExportPdfButton />
             <LanguageSwitcher />
           </div>
