@@ -1,66 +1,94 @@
 {
-  "common": {
-    "login": "Entrar",
-    "logout": "Sair",
-    "dashboard": "Painel",
-    "settings": "Configurações",
-    "exportPdf": "Exportar como PDF",
-    "loading": "Carregando...",
-    "language": "Idioma"
-  },
   "login": {
-    "title": "KampagnenRadar",
+    "title": "Entrar",
     "subtitle": "Acesse para entender suas campanhas.",
-    "email": "Endereço de e-mail",
+    "email": "E-mail",
     "password": "Senha",
     "signIn": "Entrar",
-    "forgotPassword": "Esqueceu a senha?",
+    "signUp": "Cadastrar",
     "noAccount": "Não tem uma conta?",
-    "createAccount": "Criar conta"
-  },
-  "dashboard": {
-    "title": "Visão Geral do Painel",
-    "welcome": "Bem-vindo de volta",
-    "lastUpdate": "Última atualização",
-    "metrics": {
-      "clicks": "Cliques",
-      "clicksDesc": "Total de cliques nos seus anúncios",
-      "impressions": "Impressões",
-      "impressionsDesc": "Quantas vezes seus anúncios foram exibidos",
-      "conversions": "Conversões",
-      "conversionsDesc": "Número de ações de meta concluídas",
-      "roas": "ROAS",
-      "roasDesc": "Retorno sobre gastos com anúncios",
-      "bounceRate": "Taxa de Rejeição",
-      "bounceRateDesc": "Porcentagem de visitantes que saem imediatamente",
-      "sessions": "Sessões",
-      "sessionsDesc": "Número de visitas ao site"
-    },
-    "charts": {
-      "sessionsTitle": "Sessões ao Longo do Tempo",
-      "sessionsDesc": "Mostra a evolução das sessões no último mês.",
-      "campaignPerformance": "Desempenho da Campanha",
-      "campaignDesc": "Comparação do desempenho das suas campanhas ativas."
+    "hasAccount": "Já tem uma conta?",
+    "forgotPassword": "Esqueceu a senha?",
+    "createAccount": "Criar conta",
+    "welcome": "Bem-vindo ao KampagnenRadar",
+    "description": "Sua plataforma central para otimização inteligente de campanhas e análise de dados.",
+    "features": {
+      "analytics": "Análise em tempo real do desempenho das campanhas",
+      "alerts": "Alertas automáticos para quedas de tráfego",
+      "suggestions": "Sugestões de otimização com IA"
     }
   },
-  "alerts": {
-    "trafficDrop": "Atenção: o tráfego do seu site caiu {{percent}}%.",
-    "lowCtr": "CTR abaixo da média. Possível causa: anúncio mal formulado.",
-    "highBounce": "Alta taxa de rejeição detectada. Verifique sua landing page."
-  },
-  "suggestions": {
-    "title": "Sugestões de Otimização",
-    "longtail": "Adicione palavras-chave long tail para atingir nichos específicos.",
-    "budget": "Reduza o orçamento do anúncio X em 15%.",
-    "lastOptimization": "Última otimização: {{date}}.",
-    "improving": "O desempenho dos seus anúncios está melhorando."
-  },
   "nav": {
-    "overview": "Visão Geral",
+    "overview": "Visão geral",
     "campaigns": "Campanhas",
-    "analytics": "Análises",
     "alerts": "Alertas",
     "suggestions": "Sugestões",
     "settings": "Configurações"
+  },
+  "dashboard": {
+    "title": "Painel de Controle",
+    "lastUpdate": "Última atualização",
+    "metrics": {
+      "clicks": "Cliques",
+      "clicksDesc": "Total de cliques em seus anúncios",
+      "impressions": "Impressões",
+      "impressionsDesc": "Quantas vezes seus anúncios foram exibidos",
+      "conversions": "Conversões",
+      "conversionsDesc": "Número de ações-alvo concluídas",
+      "roas": "ROAS",
+      "roasDesc": "Retorno sobre investimento em publicidade",
+      "bounceRate": "Taxa de rejeição",
+      "bounceRateDesc": "Porcentagem de visitas de página única",
+      "cost": "Custo",
+      "costDesc": "Gastos totais com publicidade"
+    }
+  },
+  "charts": {
+    "sessions": "Evolução das Sessões",
+    "sessionsDesc": "Mostra a evolução das sessões no último mês.",
+    "campaigns": "Desempenho das Campanhas",
+    "campaignsDesc": "Comparação de cliques e conversões por campanha."
+  },
+  "alerts": {
+    "title": "Alerta Importante",
+    "dismiss": "Fechar",
+    "trafficDrop": "Atenção: o tráfego do seu site caiu {percent}%.",
+    "lowCtr": "CTR abaixo da média. Possível causa: anúncio mal formulado."
+  },
+  "suggestions": {
+    "title": "Sugestões de Otimização",
+    "lastOptimization": "Última otimização: {date}",
+    "longtail": "Adicione palavras-chave long tail para atingir nichos específicos.",
+    "budget": "Reduza o orçamento do anúncio X em 15%.",
+    "improving": "O desempenho dos seus anúncios está melhorando."
+  },
+  "suggestions": {
+    "title": "Sugestões de Otimização",
+    "lastOptimization": "Última otimização: {date}",
+    "longtail": "Adicione palavras-chave long tail para atingir nichos específicos.",
+    "budget": "Reduza o orçamento do anúncio X em 15%."
+  },
+  "table": {
+    "title": "Desempenho das Campanhas (Comparação com Período Anterior)",
+    "campaign": "Campanha",
+    "budget": "Orçamento",
+    "clicks": "Cliques",
+    "impressions": "Impressões",
+    "ctr": "CTR",
+    "avgCpc": "CPC Méd.",
+    "cost": "Custo",
+    "conversions": "Conversões",
+    "costPerConv": "Custo/Conv.",
+    "convRate": "Taxa Conv."
+  },
+  "export": {
+    "pdf": "Exportar como PDF",
+    "generating": "Gerando..."
+  },
+  "common": {
+    "logout": "Sair",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "noData": "Nenhum dado disponível"
   }
 }

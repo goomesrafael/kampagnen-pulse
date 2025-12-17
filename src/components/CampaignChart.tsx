@@ -10,18 +10,23 @@ interface CampaignChartProps {
   data?: CampaignData[];
 }
 
-// Fallback sample campaign data
-const sampleCampaignData: CampaignData[] = [
-  { name: 'Brand Search', clicks: 4520, impressions: 45200, conversions: 312, spend: 1200 },
-  { name: 'Shopping', clicks: 3890, impressions: 38900, conversions: 245, spend: 980 },
-  { name: 'Display', clicks: 2100, impressions: 42000, conversions: 89, spend: 650 },
-  { name: 'Remarketing', clicks: 1850, impressions: 18500, conversions: 167, spend: 420 },
-  { name: 'Video', clicks: 980, impressions: 19600, conversions: 42, spend: 380 },
-];
+interface ChartDataPoint {
+  name: string;
+  clicks: number;
+  conversions: number;
+  spend: number;
+}
 
 export function CampaignChart({ className, loading = false, data }: CampaignChartProps) {
   const { t } = useTranslation();
-  const chartData = data && data.length > 0 ? data : sampleCampaignData;
+  
+  // Transform campaign data to chart format
+  const chartData: ChartDataPoint[] = data?.map(c => ({
+    name: c.name,
+    clicks: c.clicks,
+    conversions: c.conversions,
+    spend: c.spend,
+  })) || [];
 
   if (loading) {
     return (
@@ -33,16 +38,27 @@ export function CampaignChart({ className, loading = false, data }: CampaignChar
     );
   }
 
+  if (chartData.length === 0) {
+    return (
+      <div className={cn('rounded-xl bg-card p-6 shadow-card', className)}>
+        <h3 className="text-base font-semibold text-foreground mb-2">
+          {t('charts.campaigns')}
+        </h3>
+        <p className="text-muted-foreground text-center py-12">{t('common.noData')}</p>
+      </div>
+    );
+  }
+
   return (
     <div className={cn('rounded-xl bg-card p-6 shadow-card card-interactive', className)}>
       <div className="flex items-start justify-between mb-1">
         <h3 className="text-base font-semibold text-foreground">
-          {t('dashboard.charts.campaignPerformance')}
+          {t('charts.campaigns')}
         </h3>
       </div>
       <p className="text-sm text-muted-foreground mb-6 flex items-center gap-1.5">
         <Info className="h-3.5 w-3.5" />
-        {t('dashboard.charts.campaignDesc')}
+        {t('charts.campaignsDesc')}
       </p>
       
       <div className="h-[300px] w-full">
@@ -66,19 +82,19 @@ export function CampaignChart({ className, loading = false, data }: CampaignChar
             <Tooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
-                  const item = payload[0].payload as CampaignData;
+                  const item = payload[0].payload as ChartDataPoint;
                   return (
                     <div className="chart-tooltip">
                       <p className="font-medium text-foreground mb-1">{item.name}</p>
                       <p className="text-primary">
-                        {t('dashboard.metrics.clicks')}: {item.clicks.toLocaleString()}
+                        {t('table.clicks')}: {item.clicks.toLocaleString()}
                       </p>
                       <p className="text-success">
-                        {t('dashboard.metrics.conversions')}: {item.conversions}
+                        {t('table.conversions')}: {item.conversions}
                       </p>
                       {item.spend > 0 && (
                         <p className="text-muted-foreground">
-                          Spend: €{item.spend.toLocaleString()}
+                          {t('table.cost')}: {item.spend.toFixed(2)} €
                         </p>
                       )}
                     </div>

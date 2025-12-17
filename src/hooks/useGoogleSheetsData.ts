@@ -21,10 +21,25 @@ export interface DailyData {
 
 export interface CampaignData {
   name: string;
+  campaignId: number;
+  status: string;
   clicks: number;
   impressions: number;
   conversions: number;
   spend: number;
+  ctr: number;
+  avgCpc: number;
+  costPerConversion: number;
+  conversionRate: number;
+  // Previous period comparisons (calculated as % change)
+  clicksChange: number;
+  impressionsChange: number;
+  ctrChange: number;
+  avgCpcChange: number;
+  costChange: number;
+  conversionsChange: number;
+  costPerConversionChange: number;
+  conversionRateChange: number;
 }
 
 export interface GoogleSheetsData {
@@ -32,52 +47,33 @@ export interface GoogleSheetsData {
   dailyData: DailyData[];
   campaigns: CampaignData[];
   lastUpdated: Date | null;
+  rawRows: RawDataRow[];
 }
 
-const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Z6RHS6gJYm1XXV2O9dUkt_yNV5KYeO3YNNPwm2icGsM/gviz/tq?tqx=out:csv';
+interface RawDataRow {
+  Date: string;
+  'Campaign ID': number;
+  'Campaign Name': string;
+  Status: string;
+  Clicks: number;
+  Impressions: number;
+  'Cost (€)': number;
+  Conversions: number;
+}
+
 const JSON_API_URL = 'https://script.google.com/macros/s/AKfycbxqw6M3CTHNKIbIqPDTVLHy0uKt-Q6KGiMEa0cbyYmMkLDWDIw_mLSoPETrz-GOEN8b/exec';
 
 const CACHE_KEY = 'kampagnenradar_data';
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-function parseCSV(csvText: string): string[][] {
-  const lines = csvText.split('\n').filter(line => line.trim());
-  return lines.map(line => {
-    const values: string[] = [];
-    let current = '';
-    let inQuotes = false;
-    
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"') {
-        inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
-        values.push(current.trim());
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-    values.push(current.trim());
-    return values;
-  });
-}
-
-function parseNumber(value: string): number {
-  if (!value) return 0;
-  const cleaned = value.replace(/[^0-9.-]/g, '');
-  return parseFloat(cleaned) || 0;
-}
-
-function parseCsvToMetrics(rows: string[][]): GoogleSheetsData {
-  // Default structure
+function parseJsonToMetrics(rows: RawDataRow[]): GoogleSheetsData {
   const defaultData: GoogleSheetsData = {
     metrics: {
       clicks: 0,
       impressions: 0,
       conversions: 0,
       roas: 0,
-      bounceRate: 0,
+      bounceRate: 42.3,
       ctr: 0,
       spend: 0,
       revenue: 0,
@@ -85,99 +81,143 @@ function parseCsvToMetrics(rows: string[][]): GoogleSheetsData {
     dailyData: [],
     campaigns: [],
     lastUpdated: new Date(),
+    rawRows: [],
   };
 
-  if (rows.length < 2) return defaultData;
+  if (!rows || rows.length === 0) return defaultData;
 
-  const headers = rows[0].map(h => h.toLowerCase().trim());
-  const dataRows = rows.slice(1);
+  // Sort rows by date (newest first)
+  const sortedRows = [...rows].sort((a, b) => 
+    new Date(b.Date).getTime() - new Date(a.Date).getTime()
+  );
 
-  // Try to find column indices
-  const clicksIdx = headers.findIndex(h => h.includes('click'));
-  const impressionsIdx = headers.findIndex(h => h.includes('impression'));
-  const conversionsIdx = headers.findIndex(h => h.includes('conversion'));
-  const roasIdx = headers.findIndex(h => h.includes('roas'));
-  const bounceIdx = headers.findIndex(h => h.includes('bounce'));
-  const ctrIdx = headers.findIndex(h => h.includes('ctr'));
-  const spendIdx = headers.findIndex(h => h.includes('spend') || h.includes('cost'));
-  const revenueIdx = headers.findIndex(h => h.includes('revenue'));
-  const dateIdx = headers.findIndex(h => h.includes('date') || h.includes('day'));
-  const sessionsIdx = headers.findIndex(h => h.includes('session'));
-  const campaignIdx = headers.findIndex(h => h.includes('campaign') || h.includes('name'));
+  // Get date ranges for current period (first half) and previous period (second half)
+  const midpoint = Math.floor(sortedRows.length / 2);
+  const currentPeriodRows = sortedRows.slice(0, midpoint);
+  const previousPeriodRows = sortedRows.slice(midpoint);
 
-  // Aggregate metrics
-  let totalClicks = 0;
-  let totalImpressions = 0;
-  let totalConversions = 0;
-  let totalSpend = 0;
-  let totalRevenue = 0;
-  let bounceRateSum = 0;
-  let bounceCount = 0;
+  // Aggregate by campaign
+  const campaignMap = new Map<string, {
+    current: { clicks: number; impressions: number; conversions: number; spend: number };
+    previous: { clicks: number; impressions: number; conversions: number; spend: number };
+    campaignId: number;
+    status: string;
+  }>();
 
-  const dailyMap = new Map<string, DailyData>();
-  const campaignMap = new Map<string, CampaignData>();
+  // Process current period
+  currentPeriodRows.forEach(row => {
+    const name = row['Campaign Name'];
+    const existing = campaignMap.get(name) || {
+      current: { clicks: 0, impressions: 0, conversions: 0, spend: 0 },
+      previous: { clicks: 0, impressions: 0, conversions: 0, spend: 0 },
+      campaignId: row['Campaign ID'],
+      status: row.Status,
+    };
+    existing.current.clicks += row.Clicks || 0;
+    existing.current.impressions += row.Impressions || 0;
+    existing.current.conversions += row.Conversions || 0;
+    existing.current.spend += row['Cost (€)'] || 0;
+    campaignMap.set(name, existing);
+  });
 
-  dataRows.forEach(row => {
-    const clicks = clicksIdx >= 0 ? parseNumber(row[clicksIdx]) : 0;
-    const impressions = impressionsIdx >= 0 ? parseNumber(row[impressionsIdx]) : 0;
-    const conversions = conversionsIdx >= 0 ? parseNumber(row[conversionsIdx]) : 0;
-    const spend = spendIdx >= 0 ? parseNumber(row[spendIdx]) : 0;
-    const revenue = revenueIdx >= 0 ? parseNumber(row[revenueIdx]) : 0;
-    const bounce = bounceIdx >= 0 ? parseNumber(row[bounceIdx]) : 0;
-    const date = dateIdx >= 0 ? row[dateIdx] : '';
-    const sessions = sessionsIdx >= 0 ? parseNumber(row[sessionsIdx]) : clicks;
-    const campaignName = campaignIdx >= 0 ? row[campaignIdx] : '';
-
-    totalClicks += clicks;
-    totalImpressions += impressions;
-    totalConversions += conversions;
-    totalSpend += spend;
-    totalRevenue += revenue;
-    
-    if (bounce > 0) {
-      bounceRateSum += bounce;
-      bounceCount++;
-    }
-
-    // Daily data aggregation
-    if (date) {
-      const existing = dailyMap.get(date) || { date, sessions: 0, clicks: 0, impressions: 0, conversions: 0 };
-      existing.sessions += sessions;
-      existing.clicks += clicks;
-      existing.impressions += impressions;
-      existing.conversions += conversions;
-      dailyMap.set(date, existing);
-    }
-
-    // Campaign aggregation
-    if (campaignName) {
-      const existing = campaignMap.get(campaignName) || { name: campaignName, clicks: 0, impressions: 0, conversions: 0, spend: 0 };
-      existing.clicks += clicks;
-      existing.impressions += impressions;
-      existing.conversions += conversions;
-      existing.spend += spend;
-      campaignMap.set(campaignName, existing);
+  // Process previous period
+  previousPeriodRows.forEach(row => {
+    const name = row['Campaign Name'];
+    const existing = campaignMap.get(name);
+    if (existing) {
+      existing.previous.clicks += row.Clicks || 0;
+      existing.previous.impressions += row.Impressions || 0;
+      existing.previous.conversions += row.Conversions || 0;
+      existing.previous.spend += row['Cost (€)'] || 0;
     }
   });
 
-  const avgBounceRate = bounceCount > 0 ? bounceRateSum / bounceCount : 42.3;
-  const ctr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
-  const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
+  // Calculate campaign metrics
+  const campaigns: CampaignData[] = [];
+  
+  campaignMap.forEach((data, name) => {
+    const { current, previous, campaignId, status } = data;
+    
+    // Current metrics
+    const ctr = current.impressions > 0 ? (current.clicks / current.impressions) * 100 : 0;
+    const avgCpc = current.clicks > 0 ? current.spend / current.clicks : 0;
+    const costPerConversion = current.conversions > 0 ? current.spend / current.conversions : 0;
+    const conversionRate = current.clicks > 0 ? (current.conversions / current.clicks) * 100 : 0;
+
+    // Previous metrics
+    const prevCtr = previous.impressions > 0 ? (previous.clicks / previous.impressions) * 100 : 0;
+    const prevAvgCpc = previous.clicks > 0 ? previous.spend / previous.clicks : 0;
+    const prevCostPerConversion = previous.conversions > 0 ? previous.spend / previous.conversions : 0;
+    const prevConversionRate = previous.clicks > 0 ? (previous.conversions / previous.clicks) * 100 : 0;
+
+    // Calculate percentage changes
+    const calcChange = (curr: number, prev: number) => {
+      if (prev === 0) return curr > 0 ? 100 : 0;
+      return ((curr - prev) / prev) * 100;
+    };
+
+    campaigns.push({
+      name,
+      campaignId,
+      status,
+      clicks: current.clicks,
+      impressions: current.impressions,
+      conversions: current.conversions,
+      spend: current.spend,
+      ctr,
+      avgCpc,
+      costPerConversion,
+      conversionRate,
+      clicksChange: calcChange(current.clicks, previous.clicks),
+      impressionsChange: calcChange(current.impressions, previous.impressions),
+      ctrChange: calcChange(ctr, prevCtr),
+      avgCpcChange: calcChange(avgCpc, prevAvgCpc),
+      costChange: calcChange(current.spend, previous.spend),
+      conversionsChange: calcChange(current.conversions, previous.conversions),
+      costPerConversionChange: calcChange(costPerConversion, prevCostPerConversion),
+      conversionRateChange: calcChange(conversionRate, prevConversionRate),
+    });
+  });
+
+  // Sort campaigns by spend (highest first)
+  campaigns.sort((a, b) => b.spend - a.spend);
+
+  // Calculate totals
+  const totalClicks = campaigns.reduce((sum, c) => sum + c.clicks, 0);
+  const totalImpressions = campaigns.reduce((sum, c) => sum + c.impressions, 0);
+  const totalConversions = campaigns.reduce((sum, c) => sum + c.conversions, 0);
+  const totalSpend = campaigns.reduce((sum, c) => sum + c.spend, 0);
+  const totalCtr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+
+  // Create daily data for charts
+  const dailyMap = new Map<string, DailyData>();
+  sortedRows.forEach(row => {
+    const dateStr = new Date(row.Date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+    const existing = dailyMap.get(dateStr) || { date: dateStr, sessions: 0, clicks: 0, impressions: 0, conversions: 0 };
+    existing.clicks += row.Clicks || 0;
+    existing.impressions += row.Impressions || 0;
+    existing.conversions += row.Conversions || 0;
+    existing.sessions += row.Clicks || 0;
+    dailyMap.set(dateStr, existing);
+  });
+
+  const dailyData = Array.from(dailyMap.values()).reverse();
 
   return {
     metrics: {
       clicks: totalClicks,
       impressions: totalImpressions,
       conversions: totalConversions,
-      roas: roas || parseNumber(dataRows[0]?.[roasIdx >= 0 ? roasIdx : 0] || '0'),
-      bounceRate: avgBounceRate,
-      ctr,
+      roas: totalSpend > 0 ? (totalConversions * 50) / totalSpend : 0, // Assuming €50 per conversion for ROAS
+      bounceRate: 42.3,
+      ctr: totalCtr,
       spend: totalSpend,
-      revenue: totalRevenue,
+      revenue: totalConversions * 50,
     },
-    dailyData: Array.from(dailyMap.values()).sort((a, b) => a.date.localeCompare(b.date)),
-    campaigns: Array.from(campaignMap.values()),
+    dailyData,
+    campaigns,
     lastUpdated: new Date(),
+    rawRows: rows,
   };
 }
 
@@ -228,51 +268,27 @@ export function useGoogleSheetsData() {
     setError(null);
 
     try {
-      // Try CSV endpoint first
-      const response = await fetch(SHEETS_CSV_URL);
-      if (!response.ok) throw new Error('CSV fetch failed');
+      const response = await fetch(JSON_API_URL);
+      if (!response.ok) throw new Error('Fetch failed');
       
-      const csvText = await response.text();
-      const rows = parseCSV(csvText);
-      const parsedData = parseCsvToMetrics(rows);
+      const jsonData = await response.json();
+      
+      if (!jsonData.success || !jsonData.rows) {
+        throw new Error('Invalid data format');
+      }
+      
+      const parsedData = parseJsonToMetrics(jsonData.rows);
       
       setData(parsedData);
       setCachedData(parsedData);
-    } catch (csvError) {
-      // Fallback to JSON API
-      try {
-        const response = await fetch(JSON_API_URL);
-        if (!response.ok) throw new Error('JSON fetch failed');
-        
-        const jsonData = await response.json();
-        
-        // Parse JSON response - adapt based on actual API structure
-        const parsedData: GoogleSheetsData = {
-          metrics: {
-            clicks: jsonData.clicks || 0,
-            impressions: jsonData.impressions || 0,
-            conversions: jsonData.conversions || 0,
-            roas: jsonData.roas || 0,
-            bounceRate: jsonData.bounceRate || 0,
-            ctr: jsonData.ctr || 0,
-            spend: jsonData.spend || 0,
-            revenue: jsonData.revenue || 0,
-          },
-          dailyData: jsonData.dailyData || [],
-          campaigns: jsonData.campaigns || [],
-          lastUpdated: new Date(),
-        };
-        
-        setData(parsedData);
-        setCachedData(parsedData);
-      } catch (jsonError) {
-        setError('Failed to fetch data from both sources');
-        
-        // Use cached data if available, even if expired
-        const cached = getCachedData();
-        if (cached) {
-          setData(cached.data);
-        }
+    } catch (fetchError) {
+      console.error('Failed to fetch data:', fetchError);
+      setError('Failed to fetch campaign data');
+      
+      // Use cached data if available, even if expired
+      const cached = getCachedData();
+      if (cached) {
+        setData(cached.data);
       }
     } finally {
       setLoading(false);
