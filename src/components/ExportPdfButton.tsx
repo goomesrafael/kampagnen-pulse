@@ -19,8 +19,8 @@ export function ExportPdfButton({ className }: ExportPdfButtonProps) {
     await new Promise((resolve) => setTimeout(resolve, 2000));
     
     toast({
-      title: t('common.exportPdf'),
-      description: 'PDF exported successfully!',
+      title: t('export.pdf'),
+      description: t('export.generating'),
     });
     
     setLoading(false);
@@ -39,7 +39,7 @@ export function ExportPdfButton({ className }: ExportPdfButtonProps) {
       ) : (
         <FileDown className="h-4 w-4 mr-2" />
       )}
-      {t('common.exportPdf')}
+      {t('export.pdf')}
     </Button>
   );
 }

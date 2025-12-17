@@ -62,12 +62,6 @@
     "budget": "Reduzieren Sie das Budget für Anzeige X um 15%.",
     "improving": "Ihre Anzeigenleistung verbessert sich."
   },
-  "suggestions": {
-    "title": "Optimierungsvorschläge",
-    "lastOptimization": "Letzte Optimierung am {date}",
-    "longtail": "Fügen Sie Longtail-Keywords hinzu, um Nischenzielgruppen zu erreichen.",
-    "budget": "Reduzieren Sie das Budget für Anzeige X um 15%."
-  },
   "table": {
     "title": "Kampagnenleistung (Vergleich mit Vorperiode)",
     "campaign": "Kampagne",
@@ -84,6 +78,11 @@
   "export": {
     "pdf": "Als PDF exportieren",
     "generating": "Wird generiert..."
+  },
+  "dateFilter": {
+    "selectRange": "Zeitraum wählen",
+    "from": "Von",
+    "to": "Bis"
   },
   "common": {
     "logout": "Abmelden",

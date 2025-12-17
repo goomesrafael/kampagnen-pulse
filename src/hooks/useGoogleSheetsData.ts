@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { DateRange } from 'react-day-picker';
 
 export interface CampaignMetrics {
   clicks: number;
@@ -48,9 +49,10 @@ export interface GoogleSheetsData {
   campaigns: CampaignData[];
   lastUpdated: Date | null;
   rawRows: RawDataRow[];
+  dateRange: { min: Date; max: Date } | null;
 }
 
-interface RawDataRow {
+export interface RawDataRow {
   Date: string;
   'Campaign ID': number;
   'Campaign Name': string;
@@ -66,7 +68,7 @@ const JSON_API_URL = 'https://script.google.com/macros/s/AKfycbxqw6M3CTHNKIbIqPD
 const CACHE_KEY = 'kampagnenradar_data';
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-function parseJsonToMetrics(rows: RawDataRow[]): GoogleSheetsData {
+function parseJsonToMetrics(rows: RawDataRow[], dateFilter?: DateRange): GoogleSheetsData {
   const defaultData: GoogleSheetsData = {
     metrics: {
       clicks: 0,
@@ -82,14 +84,33 @@ function parseJsonToMetrics(rows: RawDataRow[]): GoogleSheetsData {
     campaigns: [],
     lastUpdated: new Date(),
     rawRows: [],
+    dateRange: null,
   };
 
   if (!rows || rows.length === 0) return defaultData;
 
+  // Filter rows by date if dateFilter is provided
+  let filteredRows = rows;
+  if (dateFilter?.from) {
+    filteredRows = rows.filter(row => {
+      const rowDate = new Date(row.Date);
+      if (dateFilter.from && rowDate < dateFilter.from) return false;
+      if (dateFilter.to && rowDate > dateFilter.to) return false;
+      return true;
+    });
+  }
+
+  if (filteredRows.length === 0) return defaultData;
+
   // Sort rows by date (newest first)
-  const sortedRows = [...rows].sort((a, b) => 
+  const sortedRows = [...filteredRows].sort((a, b) => 
     new Date(b.Date).getTime() - new Date(a.Date).getTime()
   );
+
+  // Calculate date range from all data
+  const allDates = rows.map(r => new Date(r.Date));
+  const minDate = new Date(Math.min(...allDates.map(d => d.getTime())));
+  const maxDate = new Date(Math.max(...allDates.map(d => d.getTime())));
 
   // Get date ranges for current period (first half) and previous period (second half)
   const midpoint = Math.floor(sortedRows.length / 2);
@@ -208,7 +229,7 @@ function parseJsonToMetrics(rows: RawDataRow[]): GoogleSheetsData {
       clicks: totalClicks,
       impressions: totalImpressions,
       conversions: totalConversions,
-      roas: totalSpend > 0 ? (totalConversions * 50) / totalSpend : 0, // Assuming €50 per conversion for ROAS
+      roas: totalSpend > 0 ? (totalConversions * 50) / totalSpend : 0,
       bounceRate: 42.3,
       ctr: totalCtr,
       spend: totalSpend,
@@ -218,6 +239,7 @@ function parseJsonToMetrics(rows: RawDataRow[]): GoogleSheetsData {
     campaigns,
     lastUpdated: new Date(),
     rawRows: rows,
+    dateRange: { min: minDate, max: maxDate },
   };
 }
 
@@ -248,8 +270,8 @@ function setCachedData(data: GoogleSheetsData) {
   }
 }
 
-export function useGoogleSheetsData() {
-  const [data, setData] = useState<GoogleSheetsData | null>(null);
+export function useGoogleSheetsData(dateFilter?: DateRange) {
+  const [rawData, setRawData] = useState<RawDataRow[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -258,7 +280,7 @@ export function useGoogleSheetsData() {
     if (!forceRefresh) {
       const cached = getCachedData();
       if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        setData(cached.data);
+        setRawData(cached.data.rawRows);
         setLoading(false);
         return;
       }
@@ -277,10 +299,10 @@ export function useGoogleSheetsData() {
         throw new Error('Invalid data format');
       }
       
-      const parsedData = parseJsonToMetrics(jsonData.rows);
-      
-      setData(parsedData);
-      setCachedData(parsedData);
+      setRawData(jsonData.rows);
+      // Cache the full data without filter
+      const fullData = parseJsonToMetrics(jsonData.rows);
+      setCachedData(fullData);
     } catch (fetchError) {
       console.error('Failed to fetch data:', fetchError);
       setError('Failed to fetch campaign data');
@@ -288,7 +310,7 @@ export function useGoogleSheetsData() {
       // Use cached data if available, even if expired
       const cached = getCachedData();
       if (cached) {
-        setData(cached.data);
+        setRawData(cached.data.rawRows);
       }
     } finally {
       setLoading(false);
@@ -298,6 +320,12 @@ export function useGoogleSheetsData() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Compute filtered data based on date range
+  const data = useMemo(() => {
+    if (!rawData) return null;
+    return parseJsonToMetrics(rawData, dateFilter);
+  }, [rawData, dateFilter]);
 
   const refresh = useCallback(() => {
     fetchData(true);
