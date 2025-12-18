@@ -23,7 +23,8 @@
     "campaigns": "Kampagnen",
     "alerts": "Warnungen",
     "suggestions": "Vorschläge",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "aiAnalytics": "KI-Analyse"
   },
   "dashboard": {
     "title": "Dashboard-Übersicht",
@@ -52,14 +53,14 @@
   "alerts": {
     "title": "Wichtige Warnung",
     "dismiss": "Schließen",
-    "trafficDrop": "Achtung: Ihr Website-Traffic ist um {percent}% gefallen.",
+    "trafficDrop": "Achtung: Ihr Website-Traffic ist um {{percent}}% gefallen.",
     "lowCtr": "Klickrate unter Durchschnitt. Mögliche Ursache: schlecht formulierte Anzeige."
   },
   "suggestions": {
     "title": "Optimierungsvorschläge",
-    "lastOptimization": "Letzte Optimierung am {date}",
-    "longtail": "Fügen Sie Longtail-Keywords hinzu, um Nischenzielgruppen zu erreichen.",
-    "budget": "Reduzieren Sie das Budget für Anzeige X um 15%.",
+    "lastOptimization": "Letzte Optimierung am {{date}}",
+    "longtail": "Fuegen Sie Longtail-Keywords zur Kampagne '{{campaign}}' hinzu, um Nischenzielgruppen zu erreichen. Diese Kampagne hat einen CTR von {{ctr}}%, was unter dem Durchschnitt von 2% liegt.",
+    "budget": "Reduzieren Sie das Budget fuer '{{campaign}}' um {{percent}}%. Diese Kampagne hat hohe Kosten pro Conversion ({{costPerConv}} EUR) im Vergleich zu anderen Kampagnen. Empfehlung: Gehen Sie zu Google Ads > Kampagnen > {{campaign}} > Budget anpassen.",
     "improving": "Ihre Anzeigenleistung verbessert sich."
   },
   "table": {
@@ -88,6 +89,17 @@
     "logout": "Abmelden",
     "loading": "Laden...",
     "error": "Fehler",
-    "noData": "Keine Daten verfügbar"
+    "noData": "Keine Daten verfuegbar"
+  },
+  "aiAnalytics": {
+    "title": "KI-Analyse",
+    "subtitle": "Automatische Analyse Ihrer Kampagnendaten",
+    "analyze": "Analyse starten",
+    "analyzing": "Analysiere...",
+    "clickToAnalyze": "Klicken Sie auf 'Analyse starten', um eine vollstaendige KI-Analyse Ihrer Kampagnen zu erhalten.",
+    "processing": "KI analysiert Ihre Kampagnendaten...",
+    "summary": "Zusammenfassung",
+    "findings": "Erkenntnisse",
+    "recommendations": "Empfehlungen"
   }
 }

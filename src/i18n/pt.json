@@ -23,7 +23,8 @@
     "campaigns": "Campanhas",
     "alerts": "Alertas",
     "suggestions": "Sugestões",
-    "settings": "Configurações"
+    "settings": "Configuracoes",
+    "aiAnalytics": "Analise de IA"
   },
   "dashboard": {
     "title": "Painel de Controle",
@@ -52,15 +53,15 @@
   "alerts": {
     "title": "Alerta Importante",
     "dismiss": "Fechar",
-    "trafficDrop": "Atenção: o tráfego do seu site caiu {percent}%.",
+    "trafficDrop": "Atenção: o tráfego do seu site caiu {{percent}}%.",
     "lowCtr": "CTR abaixo da média. Possível causa: anúncio mal formulado."
   },
   "suggestions": {
-    "title": "Sugestões de Otimização",
-    "lastOptimization": "Última otimização: {date}",
-    "longtail": "Adicione palavras-chave long tail para atingir nichos específicos.",
-    "budget": "Reduza o orçamento do anúncio X em 15%.",
-    "improving": "O desempenho dos seus anúncios está melhorando."
+    "title": "Sugestoes de Otimizacao",
+    "lastOptimization": "Ultima otimizacao: {{date}}",
+    "longtail": "Adicione palavras-chave long tail a campanha '{{campaign}}' para atingir nichos especificos. Esta campanha tem CTR de {{ctr}}%, abaixo da media de 2%.",
+    "budget": "Reduza o orcamento de '{{campaign}}' em {{percent}}%. Esta campanha tem alto custo por conversao ({{costPerConv}} EUR) comparado as outras. Recomendacao: Va para Google Ads > Campanhas > {{campaign}} > Ajustar orcamento.",
+    "improving": "O desempenho dos seus anuncios esta melhorando."
   },
   "table": {
     "title": "Desempenho das Campanhas (Comparação com Período Anterior)",
@@ -88,6 +89,17 @@
     "logout": "Sair",
     "loading": "Carregando...",
     "error": "Erro",
-    "noData": "Nenhum dado disponível"
+    "noData": "Nenhum dado disponivel"
+  },
+  "aiAnalytics": {
+    "title": "Analise de IA",
+    "subtitle": "Analise automatica dos dados da sua campanha",
+    "analyze": "Iniciar analise",
+    "analyzing": "Analisando...",
+    "clickToAnalyze": "Clique em 'Iniciar analise' para obter uma analise completa de IA das suas campanhas.",
+    "processing": "IA analisando os dados da sua campanha...",
+    "summary": "Resumo",
+    "findings": "Descobertas",
+    "recommendations": "Recomendacoes"
   }
 }

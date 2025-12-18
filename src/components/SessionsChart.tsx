@@ -46,12 +46,12 @@ export function SessionsChart({ className, loading = false, data }: SessionsChar
     <div className={cn('rounded-xl bg-card p-6 shadow-card card-interactive', className)}>
       <div className="flex items-start justify-between mb-1">
         <h3 className="text-base font-semibold text-foreground">
-          {t('dashboard.charts.sessionsTitle')}
+          {t('charts.sessions')}
         </h3>
       </div>
       <p className="text-sm text-muted-foreground mb-6 flex items-center gap-1.5">
         <Info className="h-3.5 w-3.5" />
-        {t('dashboard.charts.sessionsDesc')}
+        {t('charts.sessionsDesc')}
       </p>
       
       <div className="h-[300px] w-full">
