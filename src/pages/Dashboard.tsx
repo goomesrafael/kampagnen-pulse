@@ -16,7 +16,8 @@ import {
   TrendingUp, 
   ArrowDownRight,
   Euro,
-  Brain
+  Brain,
+  Search
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -28,6 +29,7 @@ import { CampaignPerformanceTable } from '@/components/CampaignPerformanceTable'
 import { AlertBanner } from '@/components/AlertBanner';
 import { DateRangePicker } from '@/components/DateRangePicker';
 import { AIAnalytics } from '@/components/AIAnalytics';
+import { SEOAnalytics } from '@/components/SEOAnalytics';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -43,6 +45,7 @@ const navItems = [
   { key: 'campaigns', icon: BarChart3, path: '/dashboard/campaigns' },
   { key: 'alerts', icon: Bell, path: '/dashboard/alerts' },
   { key: 'suggestions', icon: Lightbulb, path: '/dashboard/suggestions' },
+  { key: 'seo', icon: Search, path: '/dashboard/seo' },
   { key: 'aiAnalytics', icon: Brain, path: '/dashboard/ai-analytics' },
   { key: 'settings', icon: Settings, path: '/dashboard/settings' },
 ];
@@ -275,8 +278,11 @@ export default function Dashboard() {
             <CampaignChart loading={loading} data={data?.campaigns} />
           </div>
 
+          {/* SEO Analytics Section */}
+          <SEOAnalytics metrics={data?.metrics} />
+
           {/* AI Analytics Section */}
-          <AIAnalytics campaigns={data?.campaigns} metrics={data?.metrics} />
+          <AIAnalytics campaigns={data?.campaigns} metrics={data?.metrics} seoScore={83} />
 
           {/* AI Suggestions Section */}
           {dynamicSuggestions.length > 0 && (

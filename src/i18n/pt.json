@@ -24,7 +24,8 @@
     "alerts": "Alertas",
     "suggestions": "Sugestões",
     "settings": "Configuracoes",
-    "aiAnalytics": "Analise de IA"
+    "aiAnalytics": "Analise de IA",
+    "seo": "Analise SEO"
   },
   "dashboard": {
     "title": "Painel de Controle",
@@ -100,6 +101,45 @@
     "processing": "IA analisando os dados da sua campanha...",
     "summary": "Resumo",
     "findings": "Descobertas",
-    "recommendations": "Recomendacoes"
+    "recommendations": "Recomendacoes",
+    "seoAnalysis": "Analise SEO",
+    "seoFindings": "Descobertas SEO"
+  },
+  "seo": {
+    "title": "Analise SEO",
+    "subtitle": "Monitore e otimize seu desempenho nos mecanismos de busca",
+    "scoreGood": "Excelente! Seu desempenho de SEO esta muito bom.",
+    "scoreAverage": "Bom, mas ha espaco para melhorias.",
+    "scoreBad": "Critico! Otimizacao de SEO imediata necessaria.",
+    "checklist": "Checklist SEO",
+    "issues": "Problemas Tecnicos de SEO",
+    "metrics": {
+      "organicTraffic": "Trafego Organico",
+      "indexedPages": "Paginas Indexadas",
+      "backlinks": "Backlinks",
+      "pageSpeed": "Velocidade",
+      "mobileScore": "Score Mobile",
+      "imagesOptimized": "Imagens Otimizadas"
+    },
+    "checks": {
+      "metaTitles": "Meta titulos presentes",
+      "metaDescriptions": "Meta descricoes",
+      "h1Tags": "Tags H1 corretas",
+      "altTags": "Alt tags em imagens",
+      "canonicalUrls": "URLs canonicas",
+      "sslCertificate": "Certificado SSL",
+      "robotsTxt": "robots.txt",
+      "sitemap": "Sitemap presente",
+      "structuredData": "Dados estruturados",
+      "coreWebVitals": "Core Web Vitals"
+    },
+    "issuesList": {
+      "structuredData": "Dados estruturados ausentes (Schema.org)",
+      "structuredDataDesc": "Adicione markup Schema JSON-LD para melhores snippets nos buscadores. Acesse: Google Search Console > Melhorias > Dados estruturados.",
+      "metaDescriptions": "28% das paginas sem meta descricao",
+      "metaDescriptionsDesc": "Adicione meta descricoes unicas (max. 160 caracteres) a todas as paginas. Ferramentas: Yoast SEO, RankMath.",
+      "pageSpeed": "Tempo de carregamento acima de 2 segundos",
+      "pageSpeedDesc": "Otimize imagens (formato WebP), ative cache do navegador e minimize CSS/JS. Ferramenta: Google PageSpeed Insights."
+    }
   }
 }
