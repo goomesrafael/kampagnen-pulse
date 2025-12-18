@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react';
 import { 
   Radar, 
   LayoutDashboard, 
@@ -14,7 +15,8 @@ import {
   Target, 
   TrendingUp, 
   ArrowDownRight,
-  Euro
+  Euro,
+  Brain
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -25,6 +27,7 @@ import { CampaignChart } from '@/components/CampaignChart';
 import { CampaignPerformanceTable } from '@/components/CampaignPerformanceTable';
 import { AlertBanner } from '@/components/AlertBanner';
 import { DateRangePicker } from '@/components/DateRangePicker';
+import { AIAnalytics } from '@/components/AIAnalytics';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -32,7 +35,6 @@ import { DateRange } from 'react-day-picker';
 import { 
   Sheet,
   SheetContent,
-  SheetTrigger,
 } from '@/components/ui/sheet';
 import { useGoogleSheetsData } from '@/hooks/useGoogleSheetsData';
 
@@ -41,6 +43,7 @@ const navItems = [
   { key: 'campaigns', icon: BarChart3, path: '/dashboard/campaigns' },
   { key: 'alerts', icon: Bell, path: '/dashboard/alerts' },
   { key: 'suggestions', icon: Lightbulb, path: '/dashboard/suggestions' },
+  { key: 'aiAnalytics', icon: Brain, path: '/dashboard/ai-analytics' },
   { key: 'settings', icon: Settings, path: '/dashboard/settings' },
 ];
 
@@ -78,6 +81,40 @@ export default function Dashboard() {
   };
 
   const metrics = data?.metrics;
+  const campaigns = data?.campaigns;
+
+  // Generate dynamic suggestions based on actual campaign data
+  const dynamicSuggestions = useMemo(() => {
+    if (!campaigns || campaigns.length === 0) return [];
+    
+    const suggestions: string[] = [];
+    const sortedByCtr = [...campaigns].sort((a, b) => a.ctr - b.ctr);
+    const sortedByCostPerConv = [...campaigns].sort((a, b) => b.costPerConversion - a.costPerConversion);
+    
+    // Find campaign with lowest CTR for longtail suggestion
+    const lowestCtrCampaign = sortedByCtr[0];
+    if (lowestCtrCampaign && lowestCtrCampaign.ctr < 2) {
+      suggestions.push(t('suggestions.longtail', {
+        campaign: lowestCtrCampaign.name,
+        ctr: lowestCtrCampaign.ctr.toFixed(2)
+      }));
+    }
+    
+    // Find campaign with highest cost per conversion for budget suggestion
+    const highestCostCampaign = sortedByCostPerConv[0];
+    if (highestCostCampaign) {
+      const avgCostPerConv = campaigns.reduce((sum, c) => sum + c.costPerConversion, 0) / campaigns.length;
+      if (highestCostCampaign.costPerConversion > avgCostPerConv * 1.2) {
+        suggestions.push(t('suggestions.budget', {
+          campaign: highestCostCampaign.name,
+          percent: '20',
+          costPerConv: highestCostCampaign.costPerConversion.toFixed(2)
+        }));
+      }
+    }
+    
+    return suggestions;
+  }, [campaigns, t]);
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
@@ -136,13 +173,9 @@ export default function Dashboard() {
         {/* Header */}
         <header className="sticky top-0 z-40 flex items-center justify-between gap-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6 py-4">
           <div className="flex items-center gap-4">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-            </Sheet>
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
+              <Menu className="h-5 w-5" />
+            </Button>
             <div>
               <h1 className="text-xl font-semibold tracking-tight">{t('dashboard.title')}</h1>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -242,37 +275,39 @@ export default function Dashboard() {
             <CampaignChart loading={loading} data={data?.campaigns} />
           </div>
 
+          {/* AI Analytics Section */}
+          <AIAnalytics campaigns={data?.campaigns} metrics={data?.metrics} />
+
           {/* AI Suggestions Section */}
-          <div className="rounded-xl bg-card p-6 shadow-card">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20">
-                <Lightbulb className="h-5 w-5 text-accent-foreground" />
-              </div>
-              <div>
-                <h3 className="font-semibold">{t('suggestions.title')}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {t('suggestions.lastOptimization', { date: '12. Dezember' })}
-                </p>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              {[
-                t('suggestions.longtail'),
-                t('suggestions.budget'),
-              ].map((suggestion, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                >
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
-                    {index + 1}
-                  </div>
-                  <p className="text-sm text-foreground">{suggestion}</p>
+          {dynamicSuggestions.length > 0 && (
+            <div className="rounded-xl bg-card p-6 shadow-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20">
+                  <Lightbulb className="h-5 w-5 text-accent-foreground" />
                 </div>
-              ))}
+                <div>
+                  <h3 className="font-semibold">{t('suggestions.title')}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t('suggestions.lastOptimization', { date: new Date().toLocaleDateString(i18n.language === 'de' ? 'de-DE' : 'pt-BR', { day: 'numeric', month: 'long' }) })}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                {dynamicSuggestions.map((suggestion, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold shrink-0">
+                      {index + 1}
+                    </div>
+                    <p className="text-sm text-foreground">{suggestion}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </main>
       </div>
     </div>
