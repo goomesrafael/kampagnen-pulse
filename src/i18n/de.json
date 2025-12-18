@@ -24,7 +24,8 @@
     "alerts": "Warnungen",
     "suggestions": "Vorschläge",
     "settings": "Einstellungen",
-    "aiAnalytics": "KI-Analyse"
+    "aiAnalytics": "KI-Analyse",
+    "seo": "SEO-Analyse"
   },
   "dashboard": {
     "title": "Dashboard-Übersicht",
@@ -100,6 +101,45 @@
     "processing": "KI analysiert Ihre Kampagnendaten...",
     "summary": "Zusammenfassung",
     "findings": "Erkenntnisse",
-    "recommendations": "Empfehlungen"
+    "recommendations": "Empfehlungen",
+    "seoAnalysis": "SEO-Analyse",
+    "seoFindings": "SEO-Erkenntnisse"
+  },
+  "seo": {
+    "title": "SEO-Analyse",
+    "subtitle": "Überwachen und optimieren Sie Ihre Suchmaschinenleistung",
+    "scoreGood": "Ausgezeichnet! Ihre SEO-Leistung ist sehr gut.",
+    "scoreAverage": "Gut, aber es gibt Verbesserungspotenzial.",
+    "scoreBad": "Kritisch! Sofortige SEO-Optimierung erforderlich.",
+    "checklist": "SEO-Checkliste",
+    "issues": "Technische SEO-Probleme",
+    "metrics": {
+      "organicTraffic": "Organischer Traffic",
+      "indexedPages": "Indexierte Seiten",
+      "backlinks": "Backlinks",
+      "pageSpeed": "Ladezeit",
+      "mobileScore": "Mobile Score",
+      "imagesOptimized": "Bilder optimiert"
+    },
+    "checks": {
+      "metaTitles": "Meta-Titel vorhanden",
+      "metaDescriptions": "Meta-Beschreibungen",
+      "h1Tags": "H1-Tags korrekt",
+      "altTags": "Alt-Tags für Bilder",
+      "canonicalUrls": "Canonical URLs",
+      "sslCertificate": "SSL-Zertifikat",
+      "robotsTxt": "robots.txt",
+      "sitemap": "Sitemap vorhanden",
+      "structuredData": "Strukturierte Daten",
+      "coreWebVitals": "Core Web Vitals"
+    },
+    "issuesList": {
+      "structuredData": "Fehlende strukturierte Daten (Schema.org)",
+      "structuredDataDesc": "Fügen Sie JSON-LD Schema-Markup hinzu für bessere Suchmaschinen-Snippets. Gehen Sie zu: Google Search Console > Verbesserungen > Strukturierte Daten.",
+      "metaDescriptions": "28% der Seiten ohne Meta-Beschreibung",
+      "metaDescriptionsDesc": "Fügen Sie eindeutige Meta-Beschreibungen (max. 160 Zeichen) zu allen Seiten hinzu. Tools: Yoast SEO, RankMath.",
+      "pageSpeed": "Ladezeit über 2 Sekunden",
+      "pageSpeedDesc": "Optimieren Sie Bilder (WebP-Format), aktivieren Sie Browser-Caching und minimieren Sie CSS/JS. Tool: Google PageSpeed Insights."
+    }
   }
 }
