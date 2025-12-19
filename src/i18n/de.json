@@ -90,7 +90,9 @@
     "logout": "Abmelden",
     "loading": "Laden...",
     "error": "Fehler",
-    "noData": "Keine Daten verfuegbar"
+    "noData": "Keine Daten verfuegbar",
+    "refresh": "Aktualisiert",
+    "refreshSuccess": "Daten erfolgreich aktualisiert!"
   },
   "aiAnalytics": {
     "title": "KI-Analyse",

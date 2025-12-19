@@ -90,7 +90,9 @@
     "logout": "Sair",
     "loading": "Carregando...",
     "error": "Erro",
-    "noData": "Nenhum dado disponivel"
+    "noData": "Nenhum dado disponivel",
+    "refresh": "Atualizado",
+    "refreshSuccess": "Dados atualizados com sucesso!"
   },
   "aiAnalytics": {
     "title": "Analise de IA",
