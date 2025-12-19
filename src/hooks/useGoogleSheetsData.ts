@@ -112,39 +112,66 @@ function parseJsonToMetrics(rows: RawDataRow[], dateFilter?: DateRange): GoogleS
   const minDate = new Date(Math.min(...allDates.map(d => d.getTime())));
   const maxDate = new Date(Math.max(...allDates.map(d => d.getTime())));
 
-  // Get date ranges for current period (first half) and previous period (second half)
+  // Calculate TOTAL metrics from ALL filtered rows first
+  let totalClicks = 0;
+  let totalImpressions = 0;
+  let totalConversions = 0;
+  let totalSpend = 0;
+
+  sortedRows.forEach(row => {
+    totalClicks += row.Clicks || 0;
+    totalImpressions += row.Impressions || 0;
+    totalConversions += row.Conversions || 0;
+    totalSpend += row['Cost (€)'] || 0;
+  });
+
+  // For comparison purposes, split into current/previous periods (for percentage changes only)
   const midpoint = Math.floor(sortedRows.length / 2);
   const currentPeriodRows = sortedRows.slice(0, midpoint);
   const previousPeriodRows = sortedRows.slice(midpoint);
 
-  // Aggregate by campaign
-  const campaignMap = new Map<string, {
+  // Aggregate by campaign - use ALL data for totals, split data for comparison
+  const campaignMapAll = new Map<string, {
+    total: { clicks: number; impressions: number; conversions: number; spend: number };
     current: { clicks: number; impressions: number; conversions: number; spend: number };
     previous: { clicks: number; impressions: number; conversions: number; spend: number };
     campaignId: number;
     status: string;
   }>();
 
-  // Process current period
-  currentPeriodRows.forEach(row => {
+  // Process ALL rows for total metrics per campaign
+  sortedRows.forEach(row => {
     const name = row['Campaign Name'];
-    const existing = campaignMap.get(name) || {
+    const existing = campaignMapAll.get(name) || {
+      total: { clicks: 0, impressions: 0, conversions: 0, spend: 0 },
       current: { clicks: 0, impressions: 0, conversions: 0, spend: 0 },
       previous: { clicks: 0, impressions: 0, conversions: 0, spend: 0 },
       campaignId: row['Campaign ID'],
       status: row.Status,
     };
-    existing.current.clicks += row.Clicks || 0;
-    existing.current.impressions += row.Impressions || 0;
-    existing.current.conversions += row.Conversions || 0;
-    existing.current.spend += row['Cost (€)'] || 0;
-    campaignMap.set(name, existing);
+    existing.total.clicks += row.Clicks || 0;
+    existing.total.impressions += row.Impressions || 0;
+    existing.total.conversions += row.Conversions || 0;
+    existing.total.spend += row['Cost (€)'] || 0;
+    campaignMapAll.set(name, existing);
   });
 
-  // Process previous period
+  // Process current period for comparison
+  currentPeriodRows.forEach(row => {
+    const name = row['Campaign Name'];
+    const existing = campaignMapAll.get(name);
+    if (existing) {
+      existing.current.clicks += row.Clicks || 0;
+      existing.current.impressions += row.Impressions || 0;
+      existing.current.conversions += row.Conversions || 0;
+      existing.current.spend += row['Cost (€)'] || 0;
+    }
+  });
+
+  // Process previous period for comparison
   previousPeriodRows.forEach(row => {
     const name = row['Campaign Name'];
-    const existing = campaignMap.get(name);
+    const existing = campaignMapAll.get(name);
     if (existing) {
       existing.previous.clicks += row.Clicks || 0;
       existing.previous.impressions += row.Impressions || 0;
@@ -153,25 +180,31 @@ function parseJsonToMetrics(rows: RawDataRow[], dateFilter?: DateRange): GoogleS
     }
   });
 
-  // Calculate campaign metrics
+  // Calculate campaign metrics using TOTAL data
   const campaigns: CampaignData[] = [];
   
-  campaignMap.forEach((data, name) => {
-    const { current, previous, campaignId, status } = data;
+  campaignMapAll.forEach((data, name) => {
+    const { total, current, previous, campaignId, status } = data;
     
-    // Current metrics
-    const ctr = current.impressions > 0 ? (current.clicks / current.impressions) * 100 : 0;
-    const avgCpc = current.clicks > 0 ? current.spend / current.clicks : 0;
-    const costPerConversion = current.conversions > 0 ? current.spend / current.conversions : 0;
-    const conversionRate = current.clicks > 0 ? (current.conversions / current.clicks) * 100 : 0;
+    // Use TOTAL metrics for the displayed values
+    const ctr = total.impressions > 0 ? (total.clicks / total.impressions) * 100 : 0;
+    const avgCpc = total.clicks > 0 ? total.spend / total.clicks : 0;
+    const costPerConversion = total.conversions > 0 ? total.spend / total.conversions : 0;
+    const conversionRate = total.clicks > 0 ? (total.conversions / total.clicks) * 100 : 0;
 
-    // Previous metrics
+    // Previous metrics for comparison
     const prevCtr = previous.impressions > 0 ? (previous.clicks / previous.impressions) * 100 : 0;
     const prevAvgCpc = previous.clicks > 0 ? previous.spend / previous.clicks : 0;
     const prevCostPerConversion = previous.conversions > 0 ? previous.spend / previous.conversions : 0;
     const prevConversionRate = previous.clicks > 0 ? (previous.conversions / previous.clicks) * 100 : 0;
 
-    // Calculate percentage changes
+    // Current period metrics for comparison
+    const currCtr = current.impressions > 0 ? (current.clicks / current.impressions) * 100 : 0;
+    const currAvgCpc = current.clicks > 0 ? current.spend / current.clicks : 0;
+    const currCostPerConversion = current.conversions > 0 ? current.spend / current.conversions : 0;
+    const currConversionRate = current.clicks > 0 ? (current.conversions / current.clicks) * 100 : 0;
+
+    // Calculate percentage changes (current period vs previous period)
     const calcChange = (curr: number, prev: number) => {
       if (prev === 0) return curr > 0 ? 100 : 0;
       return ((curr - prev) / prev) * 100;
@@ -181,33 +214,28 @@ function parseJsonToMetrics(rows: RawDataRow[], dateFilter?: DateRange): GoogleS
       name,
       campaignId,
       status,
-      clicks: current.clicks,
-      impressions: current.impressions,
-      conversions: current.conversions,
-      spend: current.spend,
+      clicks: total.clicks,  // Use TOTAL
+      impressions: total.impressions,  // Use TOTAL
+      conversions: total.conversions,  // Use TOTAL
+      spend: total.spend,  // Use TOTAL
       ctr,
       avgCpc,
       costPerConversion,
       conversionRate,
       clicksChange: calcChange(current.clicks, previous.clicks),
       impressionsChange: calcChange(current.impressions, previous.impressions),
-      ctrChange: calcChange(ctr, prevCtr),
-      avgCpcChange: calcChange(avgCpc, prevAvgCpc),
+      ctrChange: calcChange(currCtr, prevCtr),
+      avgCpcChange: calcChange(currAvgCpc, prevAvgCpc),
       costChange: calcChange(current.spend, previous.spend),
       conversionsChange: calcChange(current.conversions, previous.conversions),
-      costPerConversionChange: calcChange(costPerConversion, prevCostPerConversion),
-      conversionRateChange: calcChange(conversionRate, prevConversionRate),
+      costPerConversionChange: calcChange(currCostPerConversion, prevCostPerConversion),
+      conversionRateChange: calcChange(currConversionRate, prevConversionRate),
     });
   });
 
   // Sort campaigns by spend (highest first)
   campaigns.sort((a, b) => b.spend - a.spend);
 
-  // Calculate totals
-  const totalClicks = campaigns.reduce((sum, c) => sum + c.clicks, 0);
-  const totalImpressions = campaigns.reduce((sum, c) => sum + c.impressions, 0);
-  const totalConversions = campaigns.reduce((sum, c) => sum + c.conversions, 0);
-  const totalSpend = campaigns.reduce((sum, c) => sum + c.spend, 0);
   const totalCtr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
 
   // Create daily data for charts
