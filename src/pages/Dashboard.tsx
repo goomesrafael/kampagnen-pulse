@@ -53,14 +53,16 @@ const navItems: { key: ViewType; icon: React.ElementType }[] = [
   { key: 'settings', icon: Settings },
 ];
 
-function formatNumber(num: number): string {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + 'M';
+function formatNumber(num: number, useAbbreviation: boolean = false): string {
+  if (useAbbreviation) {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    }
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
   }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K';
-  }
-  return num.toLocaleString();
+  return num.toLocaleString('de-DE');
 }
 
 function formatLastUpdate(date: Date | null, locale: string): string {
