@@ -143,5 +143,36 @@
       "pageSpeed": "Ladezeit über 2 Sekunden",
       "pageSpeedDesc": "Optimieren Sie Bilder (WebP-Format), aktivieren Sie Browser-Caching und minimieren Sie CSS/JS. Tool: Google PageSpeed Insights."
     }
+  },
+  "products": {
+    "title": "Produktanalyse",
+    "subtitle": "Übersicht über Ihre Produktverkäufe und -leistung",
+    "topSelling": "Top-Verkäufer",
+    "slowMoving": "Langsam verkaufende Produkte",
+    "allProducts": "Alle Produkte",
+    "units": "Einheiten",
+    "stock": "Bestand",
+    "metrics": {
+      "totalProducts": "Produkte gesamt",
+      "totalRevenue": "Gesamtumsatz",
+      "unitsSold": "Verkaufte Einheiten",
+      "avgPrice": "Ø Preis",
+      "bestsellers": "Bestseller",
+      "slowMoving": "Langsam verkaufend"
+    },
+    "table": {
+      "name": "Produkt",
+      "category": "Kategorie",
+      "unitsSold": "Verkauft",
+      "revenue": "Umsatz",
+      "stock": "Bestand",
+      "status": "Status"
+    },
+    "status": {
+      "bestseller": "Bestseller",
+      "good": "Gut",
+      "slow": "Langsam",
+      "critical": "Kritisch"
+    }
   }
 }
