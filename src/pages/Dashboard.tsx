@@ -30,6 +30,7 @@ import { AlertBanner } from '@/components/AlertBanner';
 import { DateRangePicker } from '@/components/DateRangePicker';
 import { AIAnalytics } from '@/components/AIAnalytics';
 import { SEOAnalytics } from '@/components/SEOAnalytics';
+import { ProductAnalytics } from '@/components/ProductAnalytics';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { DateRange } from 'react-day-picker';
@@ -584,7 +585,12 @@ export default function Dashboard() {
           </div>
         );
       case 'seo':
-        return <SEOAnalytics metrics={data?.metrics} />;
+        return (
+          <div className="space-y-6">
+            <ProductAnalytics onRefresh={handleRefresh} />
+            <SEOAnalytics metrics={data?.metrics} />
+          </div>
+        );
       case 'aiAnalytics':
         return <AIAnalytics campaigns={data?.campaigns} metrics={data?.metrics} seoScore={83} />;
       case 'settings':

@@ -143,5 +143,36 @@
       "pageSpeed": "Tempo de carregamento acima de 2 segundos",
       "pageSpeedDesc": "Otimize imagens (formato WebP), ative cache do navegador e minimize CSS/JS. Ferramenta: Google PageSpeed Insights."
     }
+  },
+  "products": {
+    "title": "Análise de Produtos",
+    "subtitle": "Visão geral das vendas e desempenho dos seus produtos",
+    "topSelling": "Mais Vendidos",
+    "slowMoving": "Produtos com Baixa Venda",
+    "allProducts": "Todos os Produtos",
+    "units": "unidades",
+    "stock": "Estoque",
+    "metrics": {
+      "totalProducts": "Total de Produtos",
+      "totalRevenue": "Receita Total",
+      "unitsSold": "Unidades Vendidas",
+      "avgPrice": "Preço Médio",
+      "bestsellers": "Mais Vendidos",
+      "slowMoving": "Baixa Venda"
+    },
+    "table": {
+      "name": "Produto",
+      "category": "Categoria",
+      "unitsSold": "Vendido",
+      "revenue": "Receita",
+      "stock": "Estoque",
+      "status": "Status"
+    },
+    "status": {
+      "bestseller": "Mais Vendido",
+      "good": "Bom",
+      "slow": "Lento",
+      "critical": "Crítico"
+    }
   }
 }
