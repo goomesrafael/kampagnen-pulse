@@ -91,7 +91,7 @@ export default function Login() {
         <div className="space-y-4 max-w-md">
           <h1 className="text-4xl font-bold leading-tight">
             {isGerman
-              ? 'Verstehen Sie Ihre Kampagnen auf einen Blick'
+              ? 'Ihre Kampagnen auf einen Blick verstehen'
               : 'Entenda suas campanhas em um relance'}
           </h1>
           <p className="text-white/80 text-lg">
