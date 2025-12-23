@@ -169,9 +169,10 @@ function parseProductData(rows: RawProductRow[]): ProductAnalyticsData {
 
   if (!rows || rows.length === 0) return defaultData;
 
-  const products: ProductData[] = rows.map((row) => {
-    const artikelnummer = String(findColumn(row, ['artikelnummer', 'artikelnr', 'sku', 'artnum']) || '');
-    const name = String(findColumn(row, ['bezeichnung', 'name', 'product', 'produkt', 'produktname', 'artikel', 'artikelname']) || 'Unbekannt');
+  // First, collect all raw product data
+  const rawProducts = rows.map((row) => {
+    const artikelnummer = String(findColumn(row, ['artikelnummer', 'artikelnr', 'sku', 'artnum']) || '').trim();
+    const name = String(findColumn(row, ['bezeichnung', 'name', 'product', 'produkt', 'produktname', 'artikel', 'artikelname']) || 'Unbekannt').trim();
     const unitsSold = Number(findColumn(row, ['menge', 'sold', 'units', 'quantity', 'verkauft', 'qty', 'anzahl']) || 0);
     const revenue = Number(findColumn(row, ['total', 'revenue', 'umsatz', 'sales', 'erlös', 'euro', 'betrag']) || 0);
     const stockOnHand = Number(findColumn(row, ['auflager', 'lager', 'stock', 'bestand', 'lagerbestand']) || 0);
@@ -187,10 +188,44 @@ function parseProductData(rows: RawProductRow[]): ProductAnalyticsData {
       stockOnHand,
       inOrders,
       available,
-      stockStatus: getStockStatus(available),
       salesChannel,
     };
-  }).filter(p => p.name !== 'Unbekannt' && p.name !== '' && (p.revenue > 0 || p.unitsSold > 0 || p.stockOnHand > 0));
+  }).filter(p => p.artikelnummer !== '' && p.name !== 'Unbekannt' && p.name !== '');
+
+  // Aggregate products by artikelnummer - combine duplicates
+  const aggregatedMap = new Map<string, {
+    artikelnummer: string;
+    name: string;
+    unitsSold: number;
+    revenue: number;
+    stockOnHand: number;
+    inOrders: number;
+    available: number;
+    salesChannel: string;
+  }>();
+
+  for (const product of rawProducts) {
+    const key = product.artikelnummer;
+    if (aggregatedMap.has(key)) {
+      const existing = aggregatedMap.get(key)!;
+      existing.unitsSold += product.unitsSold;
+      existing.revenue += product.revenue;
+      // For stock, use the max values (stock data should be the same for same article)
+      existing.stockOnHand = Math.max(existing.stockOnHand, product.stockOnHand);
+      existing.inOrders = Math.max(existing.inOrders, product.inOrders);
+      existing.available = Math.max(existing.available, product.available);
+    } else {
+      aggregatedMap.set(key, { ...product });
+    }
+  }
+
+  // Convert aggregated map to ProductData array
+  const products: ProductData[] = Array.from(aggregatedMap.values())
+    .filter(p => p.revenue > 0 || p.unitsSold > 0 || p.stockOnHand > 0)
+    .map(p => ({
+      ...p,
+      stockStatus: getStockStatus(p.available),
+    }));
 
   // Calculate metrics
   const totalProducts = products.length;
@@ -201,10 +236,11 @@ function parseProductData(rows: RawProductRow[]): ProductAnalyticsData {
   const warningStock = products.filter(p => p.stockStatus === 'warning').length;
   const criticalStock = products.filter(p => p.stockStatus === 'critical').length;
 
-  // Sort products
+  // Sort products by revenue for top sellers
   const sortedByRevenue = [...products].sort((a, b) => b.revenue - a.revenue);
   const topProducts = sortedByRevenue.slice(0, 5);
   
+  // Sort by units sold ascending for slow sellers (only products with some activity)
   const sortedByUnitsAsc = [...products].filter(p => p.revenue > 0 || p.unitsSold > 0).sort((a, b) => a.unitsSold - b.unitsSold);
   const slowProducts = sortedByUnitsAsc.slice(0, 5);
   

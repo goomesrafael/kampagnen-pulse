@@ -281,7 +281,7 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
             <div className="rounded-xl bg-card p-6 shadow-card">
               <div className="flex items-center gap-3 mb-4">
                 <TrendingUp className="h-5 w-5 text-green-600" />
-                <h4 className="font-semibold">{isGerman ? 'Top 5 Bestseller' : 'Top 5 Mais Vendidos'}</h4>
+                <h4 className="font-semibold">{isGerman ? 'Top 5 Mais Vendidos' : 'Top 5 Mais Vendidos'}</h4>
               </div>
               <div className="space-y-3">
                 {data.topProducts.map((product, index) => (
@@ -294,14 +294,14 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
                         {index + 1}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-sm truncate">{product.name}</p>
-                        <p className="text-xs text-muted-foreground">{product.artikelnummer}</p>
+                        <p className="font-medium text-sm">{product.artikelnummer}</p>
+                        <p className="text-xs text-muted-foreground truncate">{product.artikelnummer}</p>
                       </div>
                     </div>
                     <div className="text-right shrink-0 ml-2">
                       <p className="font-semibold text-sm text-green-600">{formatCurrency(product.revenue)}</p>
                       <div className="flex items-center gap-1 justify-end">
-                        <span className="text-xs text-muted-foreground">{formatNumber(product.unitsSold)} {isGerman ? 'Stk.' : 'un.'}</span>
+                        <span className="text-xs text-muted-foreground">{formatNumber(product.unitsSold)} {isGerman ? 'un.' : 'un.'}</span>
                         <span className={cn('px-1.5 py-0.5 rounded text-xs font-medium border', getStockStatusColor(product.stockStatus))}>
                           {product.available}
                         </span>
@@ -316,7 +316,7 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
             <div className="rounded-xl bg-card p-6 shadow-card">
               <div className="flex items-center gap-3 mb-4">
                 <TrendingDown className="h-5 w-5 text-yellow-600" />
-                <h4 className="font-semibold">{isGerman ? 'Top 5 Langsamverkäufer' : 'Top 5 Baixa Venda'}</h4>
+                <h4 className="font-semibold">{isGerman ? 'Top 5 Baixa Venda' : 'Top 5 Baixa Venda'}</h4>
               </div>
               <div className="space-y-3">
                 {data.slowProducts.map((product, index) => (
@@ -332,12 +332,12 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
                         {getStockStatusIcon(product.stockStatus)}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-sm truncate">{product.name}</p>
-                        <p className="text-xs text-muted-foreground">{product.artikelnummer}</p>
+                        <p className="font-medium text-sm">{product.artikelnummer}</p>
+                        <p className="text-xs text-muted-foreground truncate">{product.artikelnummer}</p>
                       </div>
                     </div>
                     <div className="text-right shrink-0 ml-2">
-                      <p className="font-semibold text-sm">{formatNumber(product.unitsSold)} {isGerman ? 'Stk.' : 'un.'}</p>
+                      <p className="font-semibold text-sm">{formatNumber(product.unitsSold)} {isGerman ? 'un.' : 'un.'}</p>
                       <p className="text-xs text-muted-foreground">{formatCurrency(product.revenue)}</p>
                     </div>
                   </div>
