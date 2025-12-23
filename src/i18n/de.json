@@ -145,20 +145,40 @@
     }
   },
   "products": {
-    "title": "Produktanalyse",
-    "subtitle": "Übersicht über Ihre Produktverkäufe und -leistung",
-    "topSelling": "Top-Verkäufer",
-    "slowMoving": "Langsam verkaufende Produkte",
+    "title": "Verkaufsanalyse & SEO",
+    "subtitle": "Umfassende Produkt- und Bestandsanalyse",
+    "topSelling": "Top 5 Bestseller",
+    "slowMoving": "Top 5 Langsamverkäufer",
     "allProducts": "Alle Produkte",
-    "units": "Einheiten",
+    "units": "Stk.",
     "stock": "Bestand",
+    "criticalAlerts": "Kritische Warnungen",
+    "notAvailable": "Nicht verfügbar!",
+    "sales": "Verkäufe",
+    "seoOpportunities": "SEO-Chancen",
+    "seoWaste": "SEO-Verluste",
+    "strategicRecommendations": "Strategische Empfehlungen",
+    "googleAds": "Google Ads",
+    "productsForInvestment": "Produkte für mehr Investment",
+    "seoOptimization": "SEO-Optimierung",
+    "productsWithPotential": "Produkte mit Potenzial",
+    "bundleCrossSell": "Bundle/Cross-Sell",
+    "productsForBundles": "Produkte für Bundles",
+    "criticalStock": "Bestand kritisch",
+    "productsToReorder": "Produkte nachbestellen",
+    "stockOverview": "Bestandsübersicht",
+    "articleNumber": "Artikelnr.",
+    "onStock": "Auf Lager",
+    "inOrders": "In Aufträgen",
+    "available": "Verfügbar",
     "metrics": {
-      "totalProducts": "Produkte gesamt",
-      "totalRevenue": "Gesamtumsatz",
-      "unitsSold": "Verkaufte Einheiten",
+      "totalProducts": "Produkte",
+      "totalRevenue": "Umsatz",
+      "unitsSold": "Verkauft",
       "avgPrice": "Ø Preis",
-      "bestsellers": "Bestseller",
-      "slowMoving": "Langsam verkaufend"
+      "healthyStock": "Gut",
+      "warningStock": "Warnung",
+      "criticalStock": "Kritisch"
     },
     "table": {
       "name": "Produkt",
@@ -169,10 +189,14 @@
       "status": "Status"
     },
     "status": {
-      "bestseller": "Bestseller",
-      "good": "Gut",
-      "slow": "Langsam",
+      "healthy": "Gut",
+      "warning": "Warnung",
       "critical": "Kritisch"
+    },
+    "priority": {
+      "high": "Hoch",
+      "medium": "Mittel",
+      "low": "Niedrig"
     }
   }
 }
