@@ -47,7 +47,7 @@ export interface RawProductRow {
   [key: string]: string | number;
 }
 
-const PRODUCT_API_URL = 'https://script.google.com/macros/s/AKfycby8NDRnPpykItjzdyx4WnewBG6kdlBkXFvJXvTywsg6aOwceg26UYqVAcL8yF9fzMrQtQ/exec';
+const PRODUCT_API_URL = 'https://script.google.com/macros/s/AKfycbyPQWeRYtnpf9PsmxPw962L47a8__VBDIv61UsjkNzr1qExwmPa_9M2AgFrr_cr5xn9RQ/exec';
 
 const PRODUCT_CACHE_KEY = 'kampagnenradar_product_data_v2';
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
