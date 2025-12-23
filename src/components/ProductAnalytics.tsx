@@ -281,7 +281,7 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
             <div className="rounded-xl bg-card p-6 shadow-card">
               <div className="flex items-center gap-3 mb-4">
                 <TrendingUp className="h-5 w-5 text-green-600" />
-                <h4 className="font-semibold">{isGerman ? 'Top 5 Mais Vendidos' : 'Top 5 Mais Vendidos'}</h4>
+                <h4 className="font-semibold">{isGerman ? 'Top 5 Meistverkaufte Produkte' : 'Top 5 Mais Vendidos'}</h4>
               </div>
               <div className="space-y-3">
                 {data.topProducts.map((product, index) => (
@@ -295,7 +295,7 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
                       </div>
                       <div className="min-w-0">
                         <p className="font-medium text-sm">{product.artikelnummer}</p>
-                        <p className="text-xs text-muted-foreground truncate">{product.artikelnummer}</p>
+                        <p className="text-xs text-muted-foreground truncate">{product.name}</p>
                       </div>
                     </div>
                     <div className="text-right shrink-0 ml-2">
@@ -316,7 +316,7 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
             <div className="rounded-xl bg-card p-6 shadow-card">
               <div className="flex items-center gap-3 mb-4">
                 <TrendingDown className="h-5 w-5 text-yellow-600" />
-                <h4 className="font-semibold">{isGerman ? 'Top 5 Baixa Venda' : 'Top 5 Baixa Venda'}</h4>
+                <h4 className="font-semibold">{isGerman ? 'Top 5 Geringe Verkäufe' : 'Top 5 Baixa Venda'}</h4>
               </div>
               <div className="space-y-3">
                 {data.slowProducts.map((product, index) => (
@@ -333,7 +333,7 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
                       </div>
                       <div className="min-w-0">
                         <p className="font-medium text-sm">{product.artikelnummer}</p>
-                        <p className="text-xs text-muted-foreground truncate">{product.artikelnummer}</p>
+                        <p className="text-xs text-muted-foreground truncate">{product.name}</p>
                       </div>
                     </div>
                     <div className="text-right shrink-0 ml-2">

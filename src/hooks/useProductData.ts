@@ -172,7 +172,7 @@ function parseProductData(rows: RawProductRow[]): ProductAnalyticsData {
   // First, collect all raw product data
   const rawProducts = rows.map((row) => {
     const artikelnummer = String(findColumn(row, ['artikelnummer', 'artikelnr', 'sku', 'artnum']) || '').trim();
-    const name = String(findColumn(row, ['bezeichnung', 'name', 'product', 'produkt', 'produktname', 'artikel', 'artikelname']) || 'Unbekannt').trim();
+    const name = String(row['Bezeichnung'] ?? findColumn(row, ['bezeichnung', 'produktname', 'artikelname', 'name', 'product']) ?? 'Unbekannt').trim();
     const unitsSold = Number(findColumn(row, ['menge', 'sold', 'units', 'quantity', 'verkauft', 'qty', 'anzahl']) || 0);
     const revenue = Number(findColumn(row, ['total', 'revenue', 'umsatz', 'sales', 'erlös', 'euro', 'betrag']) || 0);
     const stockOnHand = Number(findColumn(row, ['auflager', 'lager', 'stock', 'bestand', 'lagerbestand']) || 0);
