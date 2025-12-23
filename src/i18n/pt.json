@@ -145,20 +145,40 @@
     }
   },
   "products": {
-    "title": "Análise de Produtos",
-    "subtitle": "Visão geral das vendas e desempenho dos seus produtos",
-    "topSelling": "Mais Vendidos",
-    "slowMoving": "Produtos com Baixa Venda",
+    "title": "Análise de Vendas e SEO",
+    "subtitle": "Análise abrangente de produtos e estoque",
+    "topSelling": "Top 5 Mais Vendidos",
+    "slowMoving": "Top 5 Baixa Venda",
     "allProducts": "Todos os Produtos",
-    "units": "unidades",
+    "units": "un.",
     "stock": "Estoque",
+    "criticalAlerts": "Alertas Críticos",
+    "notAvailable": "Indisponível!",
+    "sales": "Vendas",
+    "seoOpportunities": "Oportunidades SEO",
+    "seoWaste": "Perdas SEO",
+    "strategicRecommendations": "Recomendações Estratégicas",
+    "googleAds": "Google Ads",
+    "productsForInvestment": "produtos para mais investimento",
+    "seoOptimization": "Otimização SEO",
+    "productsWithPotential": "produtos com potencial",
+    "bundleCrossSell": "Bundle/Cross-Sell",
+    "productsForBundles": "produtos para bundles",
+    "criticalStock": "Estoque Crítico",
+    "productsToReorder": "produtos para reabastecer",
+    "stockOverview": "Visão de Estoque",
+    "articleNumber": "SKU",
+    "onStock": "Em Estoque",
+    "inOrders": "Em Pedidos",
+    "available": "Disponível",
     "metrics": {
-      "totalProducts": "Total de Produtos",
-      "totalRevenue": "Receita Total",
-      "unitsSold": "Unidades Vendidas",
-      "avgPrice": "Preço Médio",
-      "bestsellers": "Mais Vendidos",
-      "slowMoving": "Baixa Venda"
+      "totalProducts": "Produtos",
+      "totalRevenue": "Receita",
+      "unitsSold": "Vendido",
+      "avgPrice": "Preço Méd.",
+      "healthyStock": "Bom",
+      "warningStock": "Alerta",
+      "criticalStock": "Crítico"
     },
     "table": {
       "name": "Produto",
@@ -169,10 +189,14 @@
       "status": "Status"
     },
     "status": {
-      "bestseller": "Mais Vendido",
-      "good": "Bom",
-      "slow": "Lento",
+      "healthy": "Saudável",
+      "warning": "Alerta",
       "critical": "Crítico"
+    },
+    "priority": {
+      "high": "Alta",
+      "medium": "Média",
+      "low": "Baixa"
     }
   }
 }
