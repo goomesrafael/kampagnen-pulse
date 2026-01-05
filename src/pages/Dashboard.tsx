@@ -31,6 +31,7 @@ import { DateRangePicker } from '@/components/DateRangePicker';
 import { AIAnalytics } from '@/components/AIAnalytics';
 import { SEOAnalytics } from '@/components/SEOAnalytics';
 import { ProductAnalytics } from '@/components/ProductAnalytics';
+import { ROASAnalytics } from '@/components/ROASAnalytics';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { DateRange } from 'react-day-picker';
@@ -41,14 +42,16 @@ import {
 import { useGoogleSheetsData } from '@/hooks/useGoogleSheetsData';
 import { toast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
+import { PieChart } from 'lucide-react';
 
-type ViewType = 'overview' | 'campaigns' | 'alerts' | 'suggestions' | 'seo' | 'aiAnalytics' | 'settings';
+type ViewType = 'overview' | 'campaigns' | 'alerts' | 'suggestions' | 'roas' | 'seo' | 'aiAnalytics' | 'settings';
 
 const navItems: { key: ViewType; icon: React.ElementType }[] = [
   { key: 'overview', icon: LayoutDashboard },
   { key: 'campaigns', icon: BarChart3 },
   { key: 'alerts', icon: Bell },
   { key: 'suggestions', icon: Lightbulb },
+  { key: 'roas', icon: PieChart },
   { key: 'seo', icon: Search },
   { key: 'aiAnalytics', icon: Brain },
   { key: 'settings', icon: Settings },
@@ -584,10 +587,12 @@ export default function Dashboard() {
             </div>
           </div>
         );
+      case 'roas':
+        return <ROASAnalytics onRefresh={handleRefresh} dateRange={dateRange} />;
       case 'seo':
         return (
           <div className="space-y-6">
-            <ProductAnalytics onRefresh={handleRefresh} />
+            <ProductAnalytics onRefresh={handleRefresh} dateRange={dateRange} />
             <SEOAnalytics metrics={data?.metrics} />
           </div>
         );
