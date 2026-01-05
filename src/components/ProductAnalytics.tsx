@@ -6,7 +6,6 @@ import {
   DollarSign,
   ShoppingCart,
   AlertTriangle,
-  Star,
   BarChart3,
   RefreshCw,
   CheckCircle2,
@@ -24,15 +23,17 @@ import { useProductData, ProductData, SEORecommendation } from '@/hooks/useProdu
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DateRange } from 'react-day-picker';
 
 interface ProductAnalyticsProps {
   className?: string;
   onRefresh?: () => void;
+  dateRange?: DateRange;
 }
 
-export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps) {
+export function ProductAnalytics({ className, onRefresh, dateRange }: ProductAnalyticsProps) {
   const { t, i18n } = useTranslation();
-  const { data, loading, error, refresh } = useProductData();
+  const { data, loading, error, refresh } = useProductData(dateRange);
   const isGerman = i18n.language === 'de';
 
   const handleRefresh = () => {
@@ -172,9 +173,9 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
             <Package className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold text-lg">{isGerman ? 'Verkaufsanalyse & SEO' : 'Análise de Vendas e SEO'}</h3>
+            <h3 className="font-semibold text-lg">{isGerman ? 'Verkaufsanalyse (Basis-Artikel)' : 'Análise de Vendas (Artigos Base)'}</h3>
             <p className="text-sm text-muted-foreground">
-              {isGerman ? 'Umfassende Produkt- und Bestandsanalyse' : 'Análise abrangente de produtos e estoque'}
+              {isGerman ? 'Aggregiert nach Produkt-Modell, nicht Varianten' : 'Agregado por modelo de produto, não variações'}
             </p>
           </div>
         </div>
@@ -195,8 +196,8 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
           </div>
           <div className="space-y-2">
             {data.criticalAlerts.slice(0, 5).map((product, index) => (
-              <div key={`alert-${product.artikelnummer}-${index}`} className="flex items-center justify-between text-sm">
-                <span className="font-medium text-red-700">{product.artikelnummer} - {product.name}</span>
+              <div key={`alert-${product.artikelBasis}-${index}`} className="flex items-center justify-between text-sm">
+                <span className="font-medium text-red-700">{product.artikelBasis} - {product.produktBasis}</span>
                 <span className="text-red-600">
                   {isGerman ? 'Nicht verfügbar! Verkäufe:' : 'Indisponível! Vendas:'} {formatNumber(product.unitsSold)}
                 </span>
@@ -211,7 +212,7 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
         <div className="p-4 rounded-lg border bg-card shadow-sm">
           <div className="flex items-center gap-2 mb-2">
             <Package className="h-4 w-4 text-primary" />
-            <span className="text-xs font-medium text-muted-foreground">{isGerman ? 'Produkte' : 'Produtos'}</span>
+            <span className="text-xs font-medium text-muted-foreground">{isGerman ? 'Basis-Produkte' : 'Produtos Base'}</span>
           </div>
           <span className="text-xl font-bold">{formatNumber(metrics.totalProducts)}</span>
         </div>
@@ -281,12 +282,12 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
             <div className="rounded-xl bg-card p-6 shadow-card">
               <div className="flex items-center gap-3 mb-4">
                 <TrendingUp className="h-5 w-5 text-green-600" />
-                <h4 className="font-semibold">{isGerman ? 'Top 5 Meistverkaufte Produkte' : 'Top 5 Mais Vendidos'}</h4>
+                <h4 className="font-semibold">{isGerman ? 'Top 5 Meistverkaufte (Basis)' : 'Top 5 Mais Vendidos (Base)'}</h4>
               </div>
               <div className="space-y-3">
                 {data.topProducts.map((product, index) => (
                   <div
-                    key={`top-${product.artikelnummer}-${index}`}
+                    key={`top-${product.artikelBasis}-${index}`}
                     className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -294,8 +295,8 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
                         {index + 1}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-sm">{product.artikelnummer}</p>
-                        <p className="text-xs text-muted-foreground truncate">{product.name}</p>
+                        <p className="font-medium text-sm">{product.artikelBasis}</p>
+                        <p className="text-xs text-muted-foreground truncate">{product.produktBasis}</p>
                       </div>
                     </div>
                     <div className="text-right shrink-0 ml-2">
@@ -316,12 +317,12 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
             <div className="rounded-xl bg-card p-6 shadow-card">
               <div className="flex items-center gap-3 mb-4">
                 <TrendingDown className="h-5 w-5 text-yellow-600" />
-                <h4 className="font-semibold">{isGerman ? 'Top 5 Geringe Verkäufe' : 'Top 5 Baixa Venda'}</h4>
+                <h4 className="font-semibold">{isGerman ? 'Top 5 Geringe Verkäufe (Basis)' : 'Top 5 Baixa Venda (Base)'}</h4>
               </div>
               <div className="space-y-3">
                 {data.slowProducts.map((product, index) => (
                   <div
-                    key={`slow-${product.artikelnummer}-${index}`}
+                    key={`slow-${product.artikelBasis}-${index}`}
                     className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -332,8 +333,8 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
                         {getStockStatusIcon(product.stockStatus)}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-sm">{product.artikelnummer}</p>
-                        <p className="text-xs text-muted-foreground truncate">{product.name}</p>
+                        <p className="font-medium text-sm">{product.artikelBasis}</p>
+                        <p className="text-xs text-muted-foreground truncate">{product.produktBasis}</p>
                       </div>
                     </div>
                     <div className="text-right shrink-0 ml-2">
@@ -361,11 +362,11 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
                   <p className="text-sm text-muted-foreground">{isGerman ? 'Keine Empfehlungen' : 'Sem recomendações'}</p>
                 ) : (
                   data.seoOpportunities.map((rec, index) => (
-                    <div key={`opp-${rec.artikelnummer}-${index}`} className="p-3 rounded-lg bg-muted/50 space-y-2">
+                    <div key={`opp-${rec.artikelBasis}-${index}`} className="p-3 rounded-lg bg-muted/50 space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2">
                           {getTypeIcon(rec.type)}
-                          <span className="font-medium text-sm">{rec.name}</span>
+                          <span className="font-medium text-sm">{rec.produktBasis}</span>
                         </div>
                         <span className={cn('px-2 py-0.5 rounded text-xs font-medium border', getPriorityColor(rec.priority))}>
                           {rec.priority === 'high' ? (isGerman ? 'Hoch' : 'Alta') : 
@@ -373,7 +374,7 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
                            (isGerman ? 'Niedrig' : 'Baixa')}
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground">{rec.artikelnummer}</p>
+                      <p className="text-xs text-muted-foreground">{rec.artikelBasis}</p>
                       <p className="text-sm font-medium text-primary">{rec.suggestion}</p>
                       <p className="text-xs text-muted-foreground">{rec.details}</p>
                     </div>
@@ -393,11 +394,11 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
                   <p className="text-sm text-muted-foreground">{isGerman ? 'Keine Verluste' : 'Sem perdas'}</p>
                 ) : (
                   data.seoWaste.map((rec, index) => (
-                    <div key={`waste-${rec.artikelnummer}-${index}`} className="p-3 rounded-lg bg-red-500/5 border border-red-500/10 space-y-2">
+                    <div key={`waste-${rec.artikelBasis}-${index}`} className="p-3 rounded-lg bg-red-500/5 border border-red-500/10 space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2">
                           {getTypeIcon(rec.type)}
-                          <span className="font-medium text-sm">{rec.name}</span>
+                          <span className="font-medium text-sm">{rec.produktBasis}</span>
                         </div>
                         <span className={cn('px-2 py-0.5 rounded text-xs font-medium border', getPriorityColor(rec.priority))}>
                           {rec.priority === 'high' ? (isGerman ? 'Hoch' : 'Alta') : 
@@ -405,7 +406,7 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
                            (isGerman ? 'Niedrig' : 'Baixa')}
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground">{rec.artikelnummer}</p>
+                      <p className="text-xs text-muted-foreground">{rec.artikelBasis}</p>
                       <p className="text-sm font-medium text-red-600">{rec.suggestion}</p>
                       <p className="text-xs text-muted-foreground">{rec.details}</p>
                     </div>
@@ -453,11 +454,11 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
         {/* Stock Tab */}
         <TabsContent value="stock" className="space-y-6">
           <div className="rounded-xl bg-card p-6 shadow-card overflow-x-auto">
-            <h4 className="font-semibold mb-4">{isGerman ? 'Bestandsübersicht' : 'Visão de Estoque'}</h4>
+            <h4 className="font-semibold mb-4">{isGerman ? 'Bestandsübersicht (Basis-Artikel)' : 'Visão de Estoque (Artigos Base)'}</h4>
             <table className="w-full min-w-[700px]">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Artikelnr.' : 'SKU'}</th>
+                  <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Artikel-Basis' : 'Artigo Base'}</th>
                   <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Produkt' : 'Produto'}</th>
                   <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Auf Lager' : 'Em Estoque'}</th>
                   <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'In Aufträgen' : 'Em Pedidos'}</th>
@@ -470,9 +471,9 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
                   .sort((a, b) => a.available - b.available)
                   .slice(0, 20)
                   .map((product, index) => (
-                    <tr key={`stock-${product.artikelnummer}-${index}`} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                      <td className="py-3 px-2 font-mono text-sm">{product.artikelnummer}</td>
-                      <td className="py-3 px-2 font-medium text-sm">{product.name}</td>
+                    <tr key={`stock-${product.artikelBasis}-${index}`} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                      <td className="py-3 px-2 font-mono text-sm">{product.artikelBasis}</td>
+                      <td className="py-3 px-2 font-medium text-sm">{product.produktBasis}</td>
                       <td className="py-3 px-2 text-right">{formatNumber(product.stockOnHand)}</td>
                       <td className="py-3 px-2 text-right">{formatNumber(product.inOrders)}</td>
                       <td className="py-3 px-2 text-right font-semibold">{formatNumber(product.available)}</td>
@@ -497,11 +498,11 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
         {/* All Products Tab */}
         <TabsContent value="all" className="space-y-6">
           <div className="rounded-xl bg-card p-6 shadow-card overflow-x-auto">
-            <h4 className="font-semibold mb-4">{isGerman ? 'Alle Produkte' : 'Todos os Produtos'} ({data.products.length})</h4>
+            <h4 className="font-semibold mb-4">{isGerman ? 'Alle Basis-Produkte' : 'Todos os Produtos Base'} ({data.products.length})</h4>
             <table className="w-full min-w-[800px]">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Artikelnr.' : 'SKU'}</th>
+                  <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Artikel-Basis' : 'Artigo Base'}</th>
                   <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Produkt' : 'Produto'}</th>
                   <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Verkauft' : 'Vendido'}</th>
                   <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Umsatz' : 'Receita'}</th>
@@ -511,9 +512,9 @@ export function ProductAnalytics({ className, onRefresh }: ProductAnalyticsProps
               </thead>
               <tbody>
                 {data.products.map((product, index) => (
-                  <tr key={`all-${product.artikelnummer}-${index}`} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-2 font-mono text-sm">{product.artikelnummer}</td>
-                    <td className="py-3 px-2 font-medium text-sm">{product.name}</td>
+                  <tr key={`all-${product.artikelBasis}-${index}`} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                    <td className="py-3 px-2 font-mono text-sm">{product.artikelBasis}</td>
+                    <td className="py-3 px-2 font-medium text-sm">{product.produktBasis}</td>
                     <td className="py-3 px-2 text-right">{formatNumber(product.unitsSold)}</td>
                     <td className="py-3 px-2 text-right text-green-600">{formatCurrency(product.revenue)}</td>
                     <td className="py-3 px-2 text-right">{formatNumber(product.available)}</td>
