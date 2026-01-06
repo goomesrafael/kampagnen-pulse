@@ -26,6 +26,19 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DateRange } from 'react-day-picker';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  Legend
+} from 'recharts';
 
 interface ROASAnalyticsProps {
   className?: string;
@@ -214,9 +227,94 @@ export function ROASAnalytics({ className, onRefresh, dateRange }: ROASAnalytics
         </div>
       </div>
 
+      {/* ROAS Charts */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Revenue by Top Products Chart */}
+        <div className="rounded-xl bg-card p-6 shadow-card">
+          <div className="flex items-center gap-3 mb-4">
+            <BarChart3 className="h-5 w-5 text-green-600" />
+            <h4 className="font-semibold">{isGerman ? 'Umsatz Top 10 Produkte' : 'Receita Top 10 Produtos'}</h4>
+          </div>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart 
+                data={roasData.profitableProducts.slice(0, 10).map(p => ({
+                  name: p.produktBasis.length > 15 ? p.produktBasis.substring(0, 15) + '...' : p.produktBasis,
+                  fullName: p.produktBasis,
+                  revenue: p.revenue,
+                  units: p.unitsSold
+                }))} 
+                layout="vertical"
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                <XAxis 
+                  type="number" 
+                  tickFormatter={(value) => formatCurrency(value)} 
+                  tick={{ fontSize: 11 }}
+                />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  width={100}
+                  tick={{ fontSize: 11 }}
+                />
+                <Tooltip 
+                  formatter={(value: number) => formatCurrency(value)}
+                  labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
+                />
+                <Bar dataKey="revenue" fill="hsl(142, 76%, 36%)" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Stock Status Distribution Pie Chart */}
+        <div className="rounded-xl bg-card p-6 shadow-card">
+          <div className="flex items-center gap-3 mb-4">
+            <PieChart className="h-5 w-5 text-purple-600" />
+            <h4 className="font-semibold">{isGerman ? 'Bestandsverteilung' : 'Distribuição de Estoque'}</h4>
+          </div>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsPieChart>
+                <Pie
+                  data={[
+                    { name: isGerman ? 'Gut' : 'Bom', value: metrics.healthyStock, color: '#22c55e' },
+                    { name: isGerman ? 'Warnung' : 'Alerta', value: metrics.warningStock, color: '#eab308' },
+                    { name: isGerman ? 'Kritisch' : 'Crítico', value: metrics.criticalStock, color: '#ef4444' },
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {[
+                    { name: isGerman ? 'Gut' : 'Bom', value: metrics.healthyStock, color: '#22c55e' },
+                    { name: isGerman ? 'Warnung' : 'Alerta', value: metrics.warningStock, color: '#eab308' },
+                    { name: isGerman ? 'Kritisch' : 'Crítico', value: metrics.criticalStock, color: '#ef4444' },
+                  ].map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value: number) => formatNumber(value)} />
+                <Legend />
+              </RechartsPieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
       {/* Tabs */}
       <Tabs defaultValue="suggestions" className="space-y-4">
-        <TabsList className="grid grid-cols-4 w-full max-w-2xl">
+        <TabsList className="grid grid-cols-5 w-full max-w-3xl">
+          <TabsTrigger value="charts" className="gap-2">
+            <BarChart3 className="h-4 w-4" />
+            <span className="hidden sm:inline">{isGerman ? 'Grafiken' : 'Gráficos'}</span>
+          </TabsTrigger>
           <TabsTrigger value="suggestions" className="gap-2">
             <Lightbulb className="h-4 w-4" />
             <span className="hidden sm:inline">{isGerman ? 'Empfehlungen' : 'Recomendações'}</span>
@@ -234,6 +332,135 @@ export function ROASAnalytics({ className, onRefresh, dateRange }: ROASAnalytics
             <span className="hidden sm:inline">{isGerman ? 'Trends' : 'Tendências'}</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* Charts Tab */}
+        <TabsContent value="charts" className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Comparison: Profitable vs Unprofitable */}
+            <div className="rounded-xl bg-card p-6 shadow-card">
+              <div className="flex items-center gap-3 mb-4">
+                <Target className="h-5 w-5 text-blue-600" />
+                <h4 className="font-semibold">{isGerman ? 'Rentabel vs Nicht-Rentabel' : 'Rentável vs Não-Rentável'}</h4>
+              </div>
+              <div className="h-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={[
+                      {
+                        category: isGerman ? 'Produkte' : 'Produtos',
+                        profitable: roasData.profitableProducts.length,
+                        unprofitable: roasData.unprofitableProducts.length,
+                      },
+                      {
+                        category: isGerman ? 'Umsatz (k€)' : 'Receita (k€)',
+                        profitable: roasData.profitableProducts.reduce((sum, p) => sum + p.revenue, 0) / 1000,
+                        unprofitable: roasData.unprofitableProducts.reduce((sum, p) => sum + p.revenue, 0) / 1000,
+                      },
+                    ]}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis dataKey="category" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="profitable" name={isGerman ? 'Rentabel' : 'Rentável'} fill="#22c55e" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="unprofitable" name={isGerman ? 'Nicht-Rentabel' : 'Não-Rentável'} fill="#ef4444" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Suggestions Distribution */}
+            <div className="rounded-xl bg-card p-6 shadow-card">
+              <div className="flex items-center gap-3 mb-4">
+                <Lightbulb className="h-5 w-5 text-yellow-600" />
+                <h4 className="font-semibold">{isGerman ? 'Empfehlungen nach Typ' : 'Recomendações por Tipo'}</h4>
+              </div>
+              <div className="h-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsPieChart>
+                    <Pie
+                      data={[
+                        { 
+                          name: isGerman ? 'Budget erhöhen' : 'Aumentar Budget', 
+                          value: roasData.suggestions.filter(s => s.type === 'increase_budget').length,
+                          color: '#22c55e'
+                        },
+                        { 
+                          name: isGerman ? 'Budget reduzieren' : 'Reduzir Budget', 
+                          value: roasData.suggestions.filter(s => s.type === 'decrease_budget').length,
+                          color: '#eab308'
+                        },
+                        { 
+                          name: isGerman ? 'Nachbestellen' : 'Reabastecer', 
+                          value: roasData.suggestions.filter(s => s.type === 'restock').length,
+                          color: '#f97316'
+                        },
+                        { 
+                          name: isGerman ? 'Optimieren' : 'Otimizar', 
+                          value: roasData.suggestions.filter(s => s.type === 'optimize_listing').length,
+                          color: '#3b82f6'
+                        },
+                        { 
+                          name: 'Bundle', 
+                          value: roasData.suggestions.filter(s => s.type === 'bundle').length,
+                          color: '#a855f7'
+                        },
+                      ].filter(d => d.value > 0)}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                      label={({ name, value }) => `${name}: ${value}`}
+                    >
+                      {[
+                        { name: isGerman ? 'Budget erhöhen' : 'Aumentar Budget', value: roasData.suggestions.filter(s => s.type === 'increase_budget').length, color: '#22c55e' },
+                        { name: isGerman ? 'Budget reduzieren' : 'Reduzir Budget', value: roasData.suggestions.filter(s => s.type === 'decrease_budget').length, color: '#eab308' },
+                        { name: isGerman ? 'Nachbestellen' : 'Reabastecer', value: roasData.suggestions.filter(s => s.type === 'restock').length, color: '#f97316' },
+                        { name: isGerman ? 'Optimieren' : 'Otimizar', value: roasData.suggestions.filter(s => s.type === 'optimize_listing').length, color: '#3b82f6' },
+                        { name: 'Bundle', value: roasData.suggestions.filter(s => s.type === 'bundle').length, color: '#a855f7' },
+                      ].filter(d => d.value > 0).map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* Period Summary */}
+          <div className="rounded-xl bg-gradient-to-br from-primary/5 to-accent/5 border p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              <h4 className="font-semibold">{isGerman ? 'Periodenübersicht' : 'Resumo do Período'}</h4>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-background/50 rounded-lg">
+                <p className="text-2xl font-bold text-green-600">{formatCurrency(roasData.totalRevenue)}</p>
+                <p className="text-sm text-muted-foreground">{isGerman ? 'Gesamt-Umsatz' : 'Receita Total'}</p>
+              </div>
+              <div className="text-center p-4 bg-background/50 rounded-lg">
+                <p className={cn('text-2xl font-bold', roasData.overallROAS >= 3 ? 'text-green-600' : roasData.overallROAS >= 2 ? 'text-yellow-600' : 'text-red-600')}>
+                  {roasData.overallROAS.toFixed(1)}x
+                </p>
+                <p className="text-sm text-muted-foreground">ROAS</p>
+              </div>
+              <div className="text-center p-4 bg-background/50 rounded-lg">
+                <p className="text-2xl font-bold text-blue-600">{roasData.profitableProducts.length}</p>
+                <p className="text-sm text-muted-foreground">{isGerman ? 'Rentable Produkte' : 'Produtos Rentáveis'}</p>
+              </div>
+              <div className="text-center p-4 bg-background/50 rounded-lg">
+                <p className="text-2xl font-bold text-red-600">{roasData.unprofitableProducts.length}</p>
+                <p className="text-sm text-muted-foreground">{isGerman ? 'Zur Optimierung' : 'Para Otimização'}</p>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
 
         {/* Suggestions Tab */}
         <TabsContent value="suggestions" className="space-y-6">
