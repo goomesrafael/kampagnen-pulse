@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   Package, 
@@ -18,7 +18,9 @@ import {
   Search,
   ArrowUpRight,
   ArrowDownRight,
-  Filter
+  Filter,
+  Download,
+  FileSpreadsheet
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProductData, ProductData, SEORecommendation } from '@/hooks/useProductData';
@@ -26,6 +28,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DateRange } from 'react-day-picker';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -47,6 +50,57 @@ export function ProductAnalytics({ className, onRefresh, dateRange }: ProductAna
   const { data, loading, error, refresh } = useProductData(dateRange);
   const isGerman = i18n.language === 'de';
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filtered products based on status and search
+  const filteredProducts = useMemo(() => {
+    if (!data) return [];
+    return data.products.filter(product => {
+      const matchesStatus = statusFilter === 'all' || product.stockStatus === statusFilter;
+      const matchesSearch = searchQuery === '' || 
+        product.artikelBasis.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.produktBasis.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesStatus && matchesSearch;
+    });
+  }, [data, statusFilter, searchQuery]);
+
+  // Export to CSV function
+  const exportToCSV = () => {
+    if (!filteredProducts.length) return;
+    
+    const headers = [
+      isGerman ? 'Artikel-Basis' : 'Artigo Base',
+      isGerman ? 'Produkt' : 'Produto',
+      isGerman ? 'Verkauft' : 'Vendido',
+      isGerman ? 'Umsatz' : 'Receita',
+      isGerman ? 'Verfügbar' : 'Disponível',
+      'Status'
+    ];
+    
+    const statusLabels = {
+      healthy: isGerman ? 'Gut' : 'Bom',
+      warning: isGerman ? 'Warnung' : 'Alerta',
+      critical: isGerman ? 'Kritisch' : 'Crítico'
+    };
+    
+    const csvContent = [
+      headers.join(';'),
+      ...filteredProducts.map(p => [
+        p.artikelBasis,
+        `"${p.produktBasis.replace(/"/g, '""')}"`,
+        p.unitsSold,
+        p.revenue.toFixed(2),
+        p.available,
+        statusLabels[p.stockStatus]
+      ].join(';'))
+    ].join('\n');
+    
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `produtos_${statusFilter}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
 
   const handleRefresh = () => {
     refresh();
@@ -534,48 +588,82 @@ export function ProductAnalytics({ className, onRefresh, dateRange }: ProductAna
         {/* All Products Tab */}
         <TabsContent value="all" className="space-y-6">
           <div className="rounded-xl bg-card p-6 shadow-card overflow-x-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="font-semibold">
-                {isGerman ? 'Alle Basis-Produkte' : 'Todos os Produtos Base'} 
-                ({statusFilter === 'all' 
-                  ? data.products.length 
-                  : data.products.filter(p => p.stockStatus === statusFilter).length})
-              </h4>
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-muted-foreground" />
-                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder={isGerman ? 'Status filtern' : 'Filtrar status'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{isGerman ? 'Alle Status' : 'Todos os Status'}</SelectItem>
-                    <SelectItem value="healthy">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        {isGerman ? 'Gut' : 'Bom'}
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="warning">
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4 text-yellow-600" />
-                        {isGerman ? 'Warnung' : 'Alerta'}
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="critical">
-                      <div className="flex items-center gap-2">
-                        <XCircle className="h-4 w-4 text-red-600" />
-                        {isGerman ? 'Kritisch' : 'Crítico'}
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                {statusFilter !== 'all' && (
-                  <Button variant="ghost" size="sm" onClick={() => setStatusFilter('all')}>
-                    {isGerman ? 'Zurücksetzen' : 'Limpar'}
-                  </Button>
-                )}
+            {/* Header with title and controls */}
+            <div className="flex flex-col gap-4 mb-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-semibold">
+                  {isGerman ? 'Alle Basis-Produkte' : 'Todos os Produtos Base'} 
+                  ({filteredProducts.length})
+                </h4>
+                <Button 
+                  onClick={exportToCSV} 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-2"
+                  disabled={filteredProducts.length === 0}
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="hidden sm:inline">{isGerman ? 'Exportieren' : 'Exportar'}</span>
+                  <FileSpreadsheet className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              {/* Search and Filter Controls */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                {/* Search Input */}
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder={isGerman ? 'Suche nach Artikelnummer oder Name...' : 'Buscar por número do artigo ou nome...'}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                
+                {/* Status Filter */}
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder={isGerman ? 'Status filtern' : 'Filtrar status'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{isGerman ? 'Alle Status' : 'Todos os Status'}</SelectItem>
+                      <SelectItem value="healthy">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          {isGerman ? 'Gut' : 'Bom'}
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="warning">
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4 text-yellow-600" />
+                          {isGerman ? 'Warnung' : 'Alerta'}
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="critical">
+                        <div className="flex items-center gap-2">
+                          <XCircle className="h-4 w-4 text-red-600" />
+                          {isGerman ? 'Kritisch' : 'Crítico'}
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {(statusFilter !== 'all' || searchQuery !== '') && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => { setStatusFilter('all'); setSearchQuery(''); }}
+                    >
+                      {isGerman ? 'Zurücksetzen' : 'Limpar'}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
+            
+            {/* Table */}
             <table className="w-full min-w-[800px]">
               <thead>
                 <tr className="border-b border-border">
@@ -588,28 +676,34 @@ export function ProductAnalytics({ className, onRefresh, dateRange }: ProductAna
                 </tr>
               </thead>
               <tbody>
-                {data.products
-                  .filter(product => statusFilter === 'all' || product.stockStatus === statusFilter)
-                  .map((product, index) => (
-                  <tr key={`all-${product.artikelBasis}-${index}`} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-2 font-mono text-sm">{product.artikelBasis}</td>
-                    <td className="py-3 px-2 font-medium text-sm">{product.produktBasis}</td>
-                    <td className="py-3 px-2 text-right">{formatNumber(product.unitsSold)}</td>
-                    <td className="py-3 px-2 text-right text-green-600">{formatCurrency(product.revenue)}</td>
-                    <td className="py-3 px-2 text-right">{formatNumber(product.available)}</td>
-                    <td className="py-3 px-2">
-                      <div className="flex justify-center">
-                        <span className={cn(
-                          'px-2 py-1 rounded text-xs font-medium border flex items-center gap-1',
-                          getStockStatusColor(product.stockStatus)
-                        )}>
-                          {getStockStatusIcon(product.stockStatus)}
-                          {getStockStatusLabel(product.stockStatus)}
-                        </span>
-                      </div>
+                {filteredProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                      {isGerman ? 'Keine Produkte gefunden' : 'Nenhum produto encontrado'}
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredProducts.map((product, index) => (
+                    <tr key={`all-${product.artikelBasis}-${index}`} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                      <td className="py-3 px-2 font-mono text-sm">{product.artikelBasis}</td>
+                      <td className="py-3 px-2 font-medium text-sm">{product.produktBasis}</td>
+                      <td className="py-3 px-2 text-right">{formatNumber(product.unitsSold)}</td>
+                      <td className="py-3 px-2 text-right text-green-600">{formatCurrency(product.revenue)}</td>
+                      <td className="py-3 px-2 text-right">{formatNumber(product.available)}</td>
+                      <td className="py-3 px-2">
+                        <div className="flex justify-center">
+                          <span className={cn(
+                            'px-2 py-1 rounded text-xs font-medium border flex items-center gap-1',
+                            getStockStatusColor(product.stockStatus)
+                          )}>
+                            {getStockStatusIcon(product.stockStatus)}
+                            {getStockStatusLabel(product.stockStatus)}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
