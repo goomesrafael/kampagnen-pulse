@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   Package, 
@@ -16,7 +17,8 @@ import {
   Trash2,
   Search,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Filter
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProductData, ProductData, SEORecommendation } from '@/hooks/useProductData';
@@ -24,6 +26,13 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DateRange } from 'react-day-picker';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface ProductAnalyticsProps {
   className?: string;
@@ -31,10 +40,13 @@ interface ProductAnalyticsProps {
   dateRange?: DateRange;
 }
 
+type StatusFilter = 'all' | 'healthy' | 'warning' | 'critical';
+
 export function ProductAnalytics({ className, onRefresh, dateRange }: ProductAnalyticsProps) {
   const { t, i18n } = useTranslation();
   const { data, loading, error, refresh } = useProductData(dateRange);
   const isGerman = i18n.language === 'de';
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
   const handleRefresh = () => {
     refresh();
@@ -241,29 +253,53 @@ export function ProductAnalytics({ className, onRefresh, dateRange }: ProductAna
           <span className="text-xl font-bold">{formatCurrency(metrics.avgPrice)}</span>
         </div>
 
-        <div className="p-4 rounded-lg border bg-green-500/10 border-green-500/20">
+        <button
+          onClick={() => setStatusFilter(statusFilter === 'healthy' ? 'all' : 'healthy')}
+          className={cn(
+            "p-4 rounded-lg border transition-all cursor-pointer hover:scale-105",
+            statusFilter === 'healthy' 
+              ? "bg-green-500/20 border-green-500/40 ring-2 ring-green-500/50" 
+              : "bg-green-500/10 border-green-500/20"
+          )}
+        >
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
             <span className="text-xs font-medium text-green-700">{isGerman ? 'Gut' : 'Bom'}</span>
           </div>
           <span className="text-xl font-bold text-green-600">{formatNumber(metrics.healthyStock)}</span>
-        </div>
+        </button>
 
-        <div className="p-4 rounded-lg border bg-yellow-500/10 border-yellow-500/20">
+        <button
+          onClick={() => setStatusFilter(statusFilter === 'warning' ? 'all' : 'warning')}
+          className={cn(
+            "p-4 rounded-lg border transition-all cursor-pointer hover:scale-105",
+            statusFilter === 'warning' 
+              ? "bg-yellow-500/20 border-yellow-500/40 ring-2 ring-yellow-500/50" 
+              : "bg-yellow-500/10 border-yellow-500/20"
+          )}
+        >
           <div className="flex items-center gap-2 mb-2">
             <AlertCircle className="h-4 w-4 text-yellow-600" />
             <span className="text-xs font-medium text-yellow-700">{isGerman ? 'Warnung' : 'Alerta'}</span>
           </div>
           <span className="text-xl font-bold text-yellow-600">{formatNumber(metrics.warningStock)}</span>
-        </div>
+        </button>
 
-        <div className="p-4 rounded-lg border bg-red-500/10 border-red-500/20">
+        <button
+          onClick={() => setStatusFilter(statusFilter === 'critical' ? 'all' : 'critical')}
+          className={cn(
+            "p-4 rounded-lg border transition-all cursor-pointer hover:scale-105",
+            statusFilter === 'critical' 
+              ? "bg-red-500/20 border-red-500/40 ring-2 ring-red-500/50" 
+              : "bg-red-500/10 border-red-500/20"
+          )}
+        >
           <div className="flex items-center gap-2 mb-2">
             <XCircle className="h-4 w-4 text-red-600" />
             <span className="text-xs font-medium text-red-700">{isGerman ? 'Kritisch' : 'Crítico'}</span>
           </div>
           <span className="text-xl font-bold text-red-600">{formatNumber(metrics.criticalStock)}</span>
-        </div>
+        </button>
       </div>
 
       {/* Tabs for different views */}
@@ -498,7 +534,48 @@ export function ProductAnalytics({ className, onRefresh, dateRange }: ProductAna
         {/* All Products Tab */}
         <TabsContent value="all" className="space-y-6">
           <div className="rounded-xl bg-card p-6 shadow-card overflow-x-auto">
-            <h4 className="font-semibold mb-4">{isGerman ? 'Alle Basis-Produkte' : 'Todos os Produtos Base'} ({data.products.length})</h4>
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-semibold">
+                {isGerman ? 'Alle Basis-Produkte' : 'Todos os Produtos Base'} 
+                ({statusFilter === 'all' 
+                  ? data.products.length 
+                  : data.products.filter(p => p.stockStatus === statusFilter).length})
+              </h4>
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder={isGerman ? 'Status filtern' : 'Filtrar status'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{isGerman ? 'Alle Status' : 'Todos os Status'}</SelectItem>
+                    <SelectItem value="healthy">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        {isGerman ? 'Gut' : 'Bom'}
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="warning">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-yellow-600" />
+                        {isGerman ? 'Warnung' : 'Alerta'}
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="critical">
+                      <div className="flex items-center gap-2">
+                        <XCircle className="h-4 w-4 text-red-600" />
+                        {isGerman ? 'Kritisch' : 'Crítico'}
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {statusFilter !== 'all' && (
+                  <Button variant="ghost" size="sm" onClick={() => setStatusFilter('all')}>
+                    {isGerman ? 'Zurücksetzen' : 'Limpar'}
+                  </Button>
+                )}
+              </div>
+            </div>
             <table className="w-full min-w-[800px]">
               <thead>
                 <tr className="border-b border-border">
@@ -511,7 +588,9 @@ export function ProductAnalytics({ className, onRefresh, dateRange }: ProductAna
                 </tr>
               </thead>
               <tbody>
-                {data.products.map((product, index) => (
+                {data.products
+                  .filter(product => statusFilter === 'all' || product.stockStatus === statusFilter)
+                  .map((product, index) => (
                   <tr key={`all-${product.artikelBasis}-${index}`} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                     <td className="py-3 px-2 font-mono text-sm">{product.artikelBasis}</td>
                     <td className="py-3 px-2 font-medium text-sm">{product.produktBasis}</td>
