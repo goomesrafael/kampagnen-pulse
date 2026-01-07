@@ -26,7 +26,8 @@
     "roas": "ROAS-Analyse",
     "settings": "Einstellungen",
     "aiAnalytics": "KI-Analyse",
-    "seo": "SEO-Analyse"
+    "seo": "SEO-Analyse",
+    "seoSales": "SEO-Verkäufe"
   },
   "dashboard": {
     "title": "Dashboard-Übersicht",

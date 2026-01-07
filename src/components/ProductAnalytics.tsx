@@ -20,7 +20,10 @@ import {
   ArrowDownRight,
   Filter,
   Download,
-  FileSpreadsheet
+  FileSpreadsheet,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProductData, ProductData, SEORecommendation } from '@/hooks/useProductData';
@@ -44,6 +47,10 @@ interface ProductAnalyticsProps {
 }
 
 type StatusFilter = 'all' | 'healthy' | 'warning' | 'critical';
+type SortField = 'artikelBasis' | 'produktBasis' | 'unitsSold' | 'revenue' | 'available' | 'stockStatus';
+type SortDirection = 'asc' | 'desc';
+
+const ITEMS_PER_PAGE = 15;
 
 export function ProductAnalytics({ className, onRefresh, dateRange }: ProductAnalyticsProps) {
   const { t, i18n } = useTranslation();
@@ -51,18 +58,77 @@ export function ProductAnalytics({ className, onRefresh, dateRange }: ProductAna
   const isGerman = i18n.language === 'de';
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState<SortField>('revenue');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Filtered products based on status and search
+  // Filtered and sorted products
   const filteredProducts = useMemo(() => {
     if (!data) return [];
-    return data.products.filter(product => {
+    let result = data.products.filter(product => {
       const matchesStatus = statusFilter === 'all' || product.stockStatus === statusFilter;
       const matchesSearch = searchQuery === '' || 
         product.artikelBasis.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.produktBasis.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesStatus && matchesSearch;
     });
-  }, [data, statusFilter, searchQuery]);
+    
+    // Sort
+    result.sort((a, b) => {
+      let comparison = 0;
+      switch (sortField) {
+        case 'artikelBasis':
+        case 'produktBasis':
+          comparison = a[sortField].localeCompare(b[sortField]);
+          break;
+        case 'unitsSold':
+        case 'revenue':
+        case 'available':
+          comparison = a[sortField] - b[sortField];
+          break;
+        case 'stockStatus':
+          const statusOrder = { critical: 0, warning: 1, healthy: 2 };
+          comparison = statusOrder[a.stockStatus] - statusOrder[b.stockStatus];
+          break;
+      }
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+    
+    return result;
+  }, [data, statusFilter, searchQuery, sortField, sortDirection]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
+
+  // Reset page when filters change
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [statusFilter, searchQuery, sortField, sortDirection]);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
+    <th 
+      className="text-left py-3 px-2 text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+      onClick={() => handleSort(field)}
+    >
+      <div className="flex items-center gap-1">
+        {children}
+        <ArrowUpDown className={cn("h-3 w-3", sortField === field ? "text-primary" : "opacity-50")} />
+      </div>
+    </th>
+  );
 
   // Export to CSV function
   const exportToCSV = () => {
@@ -667,23 +733,23 @@ export function ProductAnalytics({ className, onRefresh, dateRange }: ProductAna
             <table className="w-full min-w-[800px]">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Artikel-Basis' : 'Artigo Base'}</th>
-                  <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Produkt' : 'Produto'}</th>
-                  <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Verkauft' : 'Vendido'}</th>
-                  <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Umsatz' : 'Receita'}</th>
-                  <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{isGerman ? 'Verfügbar' : 'Disponível'}</th>
-                  <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">Status</th>
+                  <SortableHeader field="artikelBasis">{isGerman ? 'Artikel-Basis' : 'Artigo Base'}</SortableHeader>
+                  <SortableHeader field="produktBasis">{isGerman ? 'Produkt' : 'Produto'}</SortableHeader>
+                  <SortableHeader field="unitsSold">{isGerman ? 'Verkauft' : 'Vendido'}</SortableHeader>
+                  <SortableHeader field="revenue">{isGerman ? 'Umsatz' : 'Receita'}</SortableHeader>
+                  <SortableHeader field="available">{isGerman ? 'Verfügbar' : 'Disponível'}</SortableHeader>
+                  <SortableHeader field="stockStatus">Status</SortableHeader>
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.length === 0 ? (
+                {paginatedProducts.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-8 text-center text-muted-foreground">
                       {isGerman ? 'Keine Produkte gefunden' : 'Nenhum produto encontrado'}
                     </td>
                   </tr>
                 ) : (
-                  filteredProducts.map((product, index) => (
+                  paginatedProducts.map((product, index) => (
                     <tr key={`all-${product.artikelBasis}-${index}`} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                       <td className="py-3 px-2 font-mono text-sm">{product.artikelBasis}</td>
                       <td className="py-3 px-2 font-medium text-sm">{product.produktBasis}</td>
@@ -706,6 +772,58 @@ export function ProductAnalytics({ className, onRefresh, dateRange }: ProductAna
                 )}
               </tbody>
             </table>
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                <div className="text-sm text-muted-foreground">
+                  {isGerman 
+                    ? `Seite ${currentPage} von ${totalPages} (${filteredProducts.length} Produkte)` 
+                    : `Página ${currentPage} de ${totalPages} (${filteredProducts.length} produtos)`}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum: number;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNum)}
+                        className="w-8 h-8 p-0"
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </TabsContent>
       </Tabs>

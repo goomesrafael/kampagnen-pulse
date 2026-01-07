@@ -30,6 +30,7 @@ import { AlertBanner } from '@/components/AlertBanner';
 import { DateRangePicker } from '@/components/DateRangePicker';
 import { AIAnalytics } from '@/components/AIAnalytics';
 import { SEOAnalytics } from '@/components/SEOAnalytics';
+import { SEOSalesAnalytics } from '@/components/SEOSalesAnalytics';
 import { ProductAnalytics } from '@/components/ProductAnalytics';
 import { ROASAnalytics } from '@/components/ROASAnalytics';
 import { Button } from '@/components/ui/button';
@@ -42,9 +43,9 @@ import {
 import { useGoogleSheetsData } from '@/hooks/useGoogleSheetsData';
 import { toast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
-import { PieChart } from 'lucide-react';
+import { PieChart, ShoppingBag } from 'lucide-react';
 
-type ViewType = 'overview' | 'campaigns' | 'alerts' | 'suggestions' | 'roas' | 'seo' | 'aiAnalytics' | 'settings';
+type ViewType = 'overview' | 'campaigns' | 'alerts' | 'suggestions' | 'roas' | 'seo' | 'seoSales' | 'aiAnalytics' | 'settings';
 
 const navItems: { key: ViewType; icon: React.ElementType }[] = [
   { key: 'overview', icon: LayoutDashboard },
@@ -53,6 +54,7 @@ const navItems: { key: ViewType; icon: React.ElementType }[] = [
   { key: 'suggestions', icon: Lightbulb },
   { key: 'roas', icon: PieChart },
   { key: 'seo', icon: Search },
+  { key: 'seoSales', icon: ShoppingBag },
   { key: 'aiAnalytics', icon: Brain },
   { key: 'settings', icon: Settings },
 ];
@@ -590,10 +592,12 @@ export default function Dashboard() {
       case 'roas':
         return <ROASAnalytics onRefresh={handleRefresh} dateRange={dateRange} />;
       case 'seo':
+        return <SEOAnalytics metrics={data?.metrics} />;
+      case 'seoSales':
         return (
           <div className="space-y-6">
+            <SEOSalesAnalytics onRefresh={handleRefresh} dateRange={dateRange} />
             <ProductAnalytics onRefresh={handleRefresh} dateRange={dateRange} />
-            <SEOAnalytics metrics={data?.metrics} />
           </div>
         );
       case 'aiAnalytics':

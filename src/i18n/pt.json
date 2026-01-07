@@ -26,7 +26,8 @@
     "roas": "Análise ROAS",
     "settings": "Configuracoes",
     "aiAnalytics": "Analise de IA",
-    "seo": "Analise SEO"
+    "seo": "Analise SEO",
+    "seoSales": "SEO Vendas"
   },
   "dashboard": {
     "title": "Painel de Controle",
