@@ -71,6 +71,15 @@ export interface ROASImprovement {
   isPositive: boolean;
 }
 
+export interface ShopAnalytics {
+  shopName: string;
+  totalRevenue: number;
+  totalUnitsSold: number;
+  productCount: number;
+  avgRevenue: number;
+  percentageOfTotal: number;
+}
+
 export interface ProductAnalyticsData {
   products: ProductData[];
   metrics: ProductMetrics;
@@ -80,6 +89,7 @@ export interface ProductAnalyticsData {
   seoOpportunities: SEORecommendation[];
   seoWaste: SEORecommendation[];
   roasData: ROASData;
+  shopAnalytics: ShopAnalytics[];
   lastUpdated: Date | null;
 }
 
@@ -347,6 +357,61 @@ function generateROASData(products: ProductData[]): ROASData {
   };
 }
 
+function generateShopAnalytics(rows: RawProductRow[], dateRange?: DateRange): ShopAnalytics[] {
+  // Filter by date range if provided
+  let filteredRows = rows;
+  if (dateRange?.from) {
+    filteredRows = rows.filter(row => {
+      const dateStr = String(row['Auftragsdatum'] || row['Date'] || row['Datum'] || '');
+      if (!dateStr) return true;
+      try {
+        const rowDate = parseISO(dateStr);
+        const from = dateRange.from!;
+        const to = dateRange.to || new Date();
+        return isWithinInterval(rowDate, { start: from, end: to });
+      } catch {
+        return true;
+      }
+    });
+  }
+
+  // Aggregate by shop
+  const shopMap = new Map<string, { revenue: number; units: number; products: Set<string> }>();
+  
+  for (const row of filteredRows) {
+    const shopRaw = String(findColumn(row, ['shopfix', 'shop', 'channel', 'kanal', 'plattform']) || '').trim();
+    const shopName = shopRaw === '' ? 'eBay' : shopRaw;
+    const revenue = Number(findColumn(row, ['total', 'revenue', 'umsatz', 'sales', 'erlös', 'euro', 'betrag']) || 0);
+    const units = Number(findColumn(row, ['menge', 'sold', 'units', 'quantity', 'verkauft', 'qty', 'anzahl']) || 0);
+    const artikelBasis = String(row['Artikel_Basis'] || row['ArtikelBasis'] || '').trim() || 
+      extractArtikelBasis(String(findColumn(row, ['artikelnummer', 'artikelnr', 'sku', 'artnum']) || ''));
+    
+    if (!shopMap.has(shopName)) {
+      shopMap.set(shopName, { revenue: 0, units: 0, products: new Set() });
+    }
+    
+    const shop = shopMap.get(shopName)!;
+    shop.revenue += revenue;
+    shop.units += units;
+    if (artikelBasis) shop.products.add(artikelBasis);
+  }
+  
+  const totalRevenue = Array.from(shopMap.values()).reduce((sum, s) => sum + s.revenue, 0);
+  
+  const analytics: ShopAnalytics[] = Array.from(shopMap.entries())
+    .map(([shopName, data]) => ({
+      shopName,
+      totalRevenue: data.revenue,
+      totalUnitsSold: data.units,
+      productCount: data.products.size,
+      avgRevenue: data.products.size > 0 ? data.revenue / data.products.size : 0,
+      percentageOfTotal: totalRevenue > 0 ? (data.revenue / totalRevenue) * 100 : 0
+    }))
+    .sort((a, b) => b.totalRevenue - a.totalRevenue);
+  
+  return analytics;
+}
+
 function parseProductData(rows: RawProductRow[], dateRange?: DateRange): ProductAnalyticsData {
   const defaultData: ProductAnalyticsData = {
     products: [],
@@ -375,6 +440,7 @@ function parseProductData(rows: RawProductRow[], dateRange?: DateRange): Product
       alerts: [],
       improvements: []
     },
+    shopAnalytics: [],
     lastUpdated: new Date(),
   };
 
@@ -514,6 +580,9 @@ function parseProductData(rows: RawProductRow[], dateRange?: DateRange): Product
   
   // Generate ROAS data
   const roasData = generateROASData(products);
+  
+  // Generate shop analytics from raw data
+  const shopAnalytics = generateShopAnalytics(rows, dateRange);
 
   return {
     products,
@@ -532,6 +601,7 @@ function parseProductData(rows: RawProductRow[], dateRange?: DateRange): Product
     seoOpportunities: opportunities,
     seoWaste: waste,
     roasData,
+    shopAnalytics,
     lastUpdated: new Date(),
   };
 }
